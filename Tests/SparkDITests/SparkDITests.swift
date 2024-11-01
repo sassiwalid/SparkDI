@@ -1,4 +1,8 @@
+#if canImport(Testing)
 import Testing
+#else
+import XCTest
+#endif
 @testable import SparkDI
 
 @Test func example() async throws {
