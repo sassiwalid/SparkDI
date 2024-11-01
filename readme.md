@@ -39,7 +39,7 @@ container.register(type: Int.self, instance: { 42 }, scope: .transient)
     •    .singleton scope creates the instance once and reuses it for every resolution.
     •    .transient scope creates a new instance each time the dependency is resolved.
     
-###Step 3: Resolve a Dependency
+### Step 3: Resolve a Dependency
 
 To get an instance of a dependency, use the resolve method:
 
