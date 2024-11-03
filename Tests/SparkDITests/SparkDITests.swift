@@ -7,6 +7,7 @@ import XCTest
 #if canImport(Testing)
 struct DependencyInjectionTests {
     @Test func singletonScopeWithSingleParameter() async throws {
+        /// Given
         let container = DependencyContainer()
 
         container.register(
@@ -15,13 +16,16 @@ struct DependencyInjectionTests {
             },
             scope: .singleton
         )
-        
+        /// When
         let instance1: String? = container.resolve(type: String.self)
         let instance2: String? = container.resolve(type: String.self)
+        
+        /// Then
         #expect(instance1 == instance2)
     }
     
     @Test func transientScopeWithSingleParameter() async throws {
+        /// Given
         let container = DependencyContainer()
 
         container.register(
@@ -30,13 +34,19 @@ struct DependencyInjectionTests {
             },
             scope: .transient
         )
-        
+
+        /// When
+
         let instance1: String? = container.resolve(type: String.self)
         let instance2: String? = container.resolve(type: String.self)
+        
+        /// Then
         #expect(instance1 != instance2)
+
     }
     
     @Test func transientScopeWithMultipleParameters() async throws {
+        /// Given
         let container = DependencyContainer()
 
         container.register(
@@ -49,8 +59,16 @@ struct DependencyInjectionTests {
             },
             scope: .transient
         )
+
+        /// When
         
-        let sharedInstance: String? = container.resolve(type: String.self, arguments: ["John", 25])
+        let sharedInstance: String? = container.resolve(
+            type: String.self,
+            arguments: ["John", 25]
+        )
+
+        /// Then
+
         #expect(sharedInstance == "John is 25 years old")
     }
     
@@ -59,35 +77,79 @@ struct DependencyInjectionTests {
     
 }
 #endif
+
 final class DependencyContainerTests: XCTestCase {
+
     func testSingletonScopeWithSingleParameter() {
+        /// Given
         let container = DependencyContainer()
-        
+
+        /// When
         container.register(type: String.self, factory: { _ in  "Singleton Instance" }, scope: .singleton)
-        
-        // Résolution
+
+        // Then
         let instance1: String? = container.resolve(type: String.self)
         let instance2: String? = container.resolve(type: String.self)
-        
-        // Vérifie que les deux résolutions renvoient la même instance
-        XCTAssertTrue(instance1 == instance2, "Singleton scope should return the same instance")
+
+        XCTAssertTrue(
+            instance1 == instance2,
+            "Singleton scope should return the same instance"
+        )
+
     }
     
     func testTransientScopeWithSingleparameter() {
+        /// Given
         let container = DependencyContainer()
-        
-        // Enregistrement en transient
+
         container.register(
             type: String.self,
             factory: { _ in UUID().uuidString
             },
-            scope: .transient)
+            scope: .transient
+        )
         
-        // Résolution
+        /// When
+
         let instance1: String? = container.resolve(type: String.self)
         let instance2: String? = container.resolve(type: String.self)
-        
-        // Vérifie que les deux résolutions renvoient des instances différentes
-        XCTAssertNotEqual(instance1, instance2, "Transient scope should create a new instance each time")
+
+        /// Then
+
+        XCTAssertNotEqual(
+            instance1,
+            instance2,
+            "Transient scope should create a new instance each time"
+        )
+    }
+    
+    func testTransientScopeWithMultipleParameters() {
+        /// Given
+        let container = DependencyContainer()
+
+        container.register(
+            type: String.self,
+            factory: { args in
+                guard let name = args[0] as? String, let age = args[1] as? Int else {
+                    return "Invalid arguments"
+                }
+                return "\(name) is \(age) years old"
+            },
+            scope: .transient
+        )
+
+        /// When
+
+        let sharedInstance: String? = container.resolve(
+            type: String.self,
+            arguments: ["John", 25]
+        )
+
+        /// Then
+
+        XCTAssertEqual(
+            sharedInstance,
+            "John is 25 years old"
+        )
     }
 }
