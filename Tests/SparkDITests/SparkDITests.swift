@@ -6,7 +6,7 @@ import XCTest
 
 #if canImport(Testing)
 struct DependencyInjectionTests {
-    @Test func singletonScope() async throws {
+    @Test func singletonScopeWithSingleParameter() async throws {
         let container = DependencyContainer()
 
         container.register(
@@ -21,7 +21,7 @@ struct DependencyInjectionTests {
         #expect(instance1 == instance2)
     }
     
-    @Test func transientScope() async throws {
+    @Test func transientScopeWithSingleParameter() async throws {
         let container = DependencyContainer()
 
         container.register(
@@ -60,7 +60,7 @@ struct DependencyInjectionTests {
 }
 #endif
 final class DependencyContainerTests: XCTestCase {
-    func testSingletonScope() {
+    func testSingletonScopeWithSingleParameter() {
         let container = DependencyContainer()
         
         container.register(type: String.self, factory: { _ in  "Singleton Instance" }, scope: .singleton)
@@ -73,7 +73,7 @@ final class DependencyContainerTests: XCTestCase {
         XCTAssertTrue(instance1 == instance2, "Singleton scope should return the same instance")
     }
     
-    func testTransientScope() {
+    func testTransientScopeWithSingleparameter() {
         let container = DependencyContainer()
         
         // Enregistrement en transient
