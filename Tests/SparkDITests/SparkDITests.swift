@@ -6,6 +6,7 @@ import XCTest
 
 #if canImport(Testing)
 struct DependencyInjectionTests {
+
     @Test func singletonScopeWithSingleParameter() async throws {
         /// Given
         let container = DependencyContainer()
@@ -62,14 +63,14 @@ struct DependencyInjectionTests {
 
         /// When
         
-        let sharedInstance: String? = container.resolve(
+        let instance: String? = container.resolve(
             type: String.self,
             arguments: ["John", 25]
         )
 
         /// Then
 
-        #expect(sharedInstance == "John is 25 years old")
+        #expect(instance == "John is 25 years old")
     }
     
     
@@ -140,7 +141,7 @@ final class DependencyContainerTests: XCTestCase {
 
         /// When
 
-        let sharedInstance: String? = container.resolve(
+        let instance: String? = container.resolve(
             type: String.self,
             arguments: ["John", 25]
         )
@@ -148,7 +149,7 @@ final class DependencyContainerTests: XCTestCase {
         /// Then
 
         XCTAssertEqual(
-            sharedInstance,
+            instance,
             "John is 25 years old"
         )
     }
