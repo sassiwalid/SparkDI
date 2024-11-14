@@ -1,3 +1,6 @@
+//
+//  Copyright © 2024 SparkDI Contributors. All rights reserved.
+//
 @testable import SparkDI
 
 struct UserModule: Module {
@@ -12,4 +15,3 @@ struct UserModule: Module {
     }
 
 }
-

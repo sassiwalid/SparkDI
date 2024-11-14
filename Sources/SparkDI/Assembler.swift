@@ -1,3 +1,6 @@
+//
+//  Copyright © 2024 SparkDI Contributors. All rights reserved.
+//
 import Foundation
 
 final class Assembler {
@@ -15,4 +18,3 @@ final class Assembler {
         container.resolve(type: type,arguments: arguments)
     }
 }
-

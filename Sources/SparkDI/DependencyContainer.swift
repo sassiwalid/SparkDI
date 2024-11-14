@@ -1,3 +1,6 @@
+//
+//  Copyright © 2024 SparkDI Contributors. All rights reserved.
+//
 enum Scope {
     case singleton
     case transient
