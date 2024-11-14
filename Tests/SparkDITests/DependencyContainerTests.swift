@@ -75,10 +75,7 @@ struct DependencyInjectionTests {
 
         #expect(instance == "John is 25 years old")
     }
-    
-    
-    
-    
+
 }
 #endif
 
