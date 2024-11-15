@@ -1,3 +1,6 @@
+//
+//  Copyright © 2024 SparkDI Contributors. All rights reserved.
+//
 #if canImport(Testing)
 import Testing
 #endif
@@ -72,10 +75,7 @@ struct DependencyInjectionTests {
 
         #expect(instance == "John is 25 years old")
     }
-    
-    
-    
-    
+
 }
 #endif
 

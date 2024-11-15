@@ -6,6 +6,8 @@ SparkDI is a dependency injection framework in Swift, designed for speed and per
 - Constructor, property, and method dependency injection
 - Scope management (Singleton, Transient)
 - Easy and flexible configuration
+- Modular dependency registration using an `Assembler` with multiple modules
+- Support for resolving dependencies with multiple arguments
 
 ## Installation
 Add SparkDI via Swift Package Manager:
@@ -54,9 +56,113 @@ let transientInt: Int? = container.resolve(type: Int.self)
 print(transientInt) // Output: 42
 
 ```
+## Using Multiple Arguments in Dependency Resolution
+
+SparkDI supports resolving dependencies that require multiple arguments by allowing resolve to accept a variable number of arguments.
+
+### Step 1: Register a Dependency with Arguments
+
+You can register a dependency that requires multiple arguments by using a factory closure that takes an array of Any types. This array will be used to pass in the required arguments when resolving the dependency.
+
+```swift
+
+container.register(
+   type: String.self,
+   factory: { args in
+
+   guard let name = args[0] as? String, let age = args[1] as? Int else {
+    return "Invalid arguments"
+   }
+
+   return "\(name) is \(age) years old"
+
+   },
+   scope: .transient
+)
+
+```
+### Step 2: Resolve the Dependency with Arguments
+
+When resolving a dependency that requires arguments, pass the arguments in the resolve method as a variadic list.
+
+```swift
+
+let instance: String? = container.resolve(
+    type: String.self,
+    arguments: ["Mohamed", 40]
+)
+
+```
+This functionality allows for flexible dependency resolution, supporting dependencies that require parameters at runtime.
+
+## Using the Assembler for Modular Dependency Management
+
+For larger projects, you can organize dependencies into modules using the Assembler. Each module registers a group of dependencies, and the assembler applies these modules to a single DependencyContainer.
+
+### Step 1: Define Modules
+
+Define each module as a struct conforming to the Module protocol, which provides a method to register dependencies in the container.
+
+```swift
+
+struct NetworkModule: Module {
+
+ func registerDependencies(in container: DependencyContainer) {
+
+    container.register(
+    type: APIService.self,
+    instance: { APIService() },
+    scope: .singleton
+    )
+
+    container.register(
+    type: NetworkManager.self,
+    instance: { NetworkManager() },
+    scope: .transient
+    )
+
+  }
+
+}
+
+struct UserModule: Module {
+  func registerDependencies(in container: DependencyContainer) {
+    
+    container.register(
+        type: UserService.self,
+        instance: { UserService() },
+        scope: .singleton
+    )
+
+    container.register(
+        type: UserSession.self,
+        instance: { UserSession() }, 
+        scope: .transient
+    )
+    
+  }
+
+}
+
+```
+
+### Step 2: Use the Assembler to Apply Modules
+
+Create an Assembler and apply the modules to register dependencies.
+```swift
+let assembler = Assembler()
+
+assembler.apply(modules: [NetworkModule(), UserModule()])
+
+// Resolving dependencies
+let apiService: APIService? = assembler.resolve(type: APIService.self)
+
+let userService: UserService? = assembler.resolve(type: UserService.self)
+
+```
+
 ## Future Improvements
 
-    •    Support for multiple parameters in the register and resolve methods
     •    Additional scope options for more flexible dependency management
     •    Expanded type safety and error handling
 
