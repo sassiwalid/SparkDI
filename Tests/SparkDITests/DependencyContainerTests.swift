@@ -10,14 +10,15 @@ import XCTest
 
 #if canImport(Testing)
 struct DependencyInjectionTests {
-
-    @Test func singletonScopeWithSingleParameter() async throws {
+    
+    @Test func singletonScopeWithoutParameter() async throws {
         /// Given
         let container = DependencyContainer()
 
         container.register(
             type: String.self,
-            factory: { _ in "Singleton instance"
+            factory: { _ in
+                "Singleton instance"
             },
             scope: .singleton
         )
@@ -29,13 +30,14 @@ struct DependencyInjectionTests {
         #expect(instance1 == instance2)
     }
     
-    @Test func transientScopeWithSingleParameter() async throws {
+    @Test func transientScopeWithoutParameter() async throws {
         /// Given
         let container = DependencyContainer()
 
         container.register(
             type: String.self,
-            factory: { _ in UUID().uuidString
+            factory: { _ in
+                UUID().uuidString
             },
             scope: .transient
         )
@@ -44,6 +46,65 @@ struct DependencyInjectionTests {
 
         let instance1: String? = container.resolve(type: String.self)
         let instance2: String? = container.resolve(type: String.self)
+        
+        /// Then
+        #expect(instance1 != instance2)
+
+    }
+    
+    @Test func singletonScopeWithSingleParameter() async throws {
+        /// Given
+        let container = DependencyContainer()
+
+        container.register(
+            type: AppConfigurationDummy.self,
+            factory: { args in
+                guard let version = args.first as? String else { fatalError("Invalid arguments") }
+                
+                return AppConfigurationDummy(version: version)
+            },
+            scope: .singleton
+        )
+
+        /// When
+
+        let instance1: AppConfigurationDummy? = container.resolve(
+            type: AppConfigurationDummy.self,
+            arguments: "1.0.0"
+        )
+        
+        let instance2: AppConfigurationDummy? = container.resolve(type: AppConfigurationDummy.self)
+        
+        /// Then
+        #expect(instance1 == instance2)
+
+    }
+    
+    @Test func transientScopeWithSingleParameter() async throws {
+        /// Given
+        let container = DependencyContainer()
+
+        container.register(
+            type: AppConfigurationDummy.self,
+            factory: { args in
+                guard let version = args.first as? String else { fatalError("Invalid arguments") }
+                
+                return AppConfigurationDummy(version: version)
+            },
+            scope: .transient
+        )
+
+        /// When
+
+        let instance1: AppConfigurationDummy? = container.resolve(
+            type: AppConfigurationDummy.self,
+            arguments: "1.0.0"
+        )
+        
+        let instance2: AppConfigurationDummy? = container.resolve(
+            type: AppConfigurationDummy.self,
+            arguments: "2.0.0"
+        )
         
         /// Then
         #expect(instance1 != instance2)
@@ -82,7 +143,7 @@ struct DependencyInjectionTests {
 
 final class DependencyContainerTests: XCTestCase {
 
-    func testSingletonScopeWithSingleParameter() {
+    func testSingletonScopeWithoutParameter() {
         /// Given
         let container = DependencyContainer()
 
@@ -100,7 +161,7 @@ final class DependencyContainerTests: XCTestCase {
 
     }
     
-    func testTransientScopeWithSingleparameter() {
+    func testTransientScopeWithoutParameter() {
         /// Given
         let container = DependencyContainer()
 
@@ -124,6 +185,75 @@ final class DependencyContainerTests: XCTestCase {
             "Transient scope should create a new instance each time"
         )
     }
+    
+    func testSingletonScopeWithSingleParameter() {
+        
+        /// Given
+        let container = DependencyContainer()
+
+        container.register(
+            type: AppConfigurationDummy.self,
+            factory: { args in
+                guard let version = args.first as? String else { fatalError("Invalid arguments") }
+                
+                return AppConfigurationDummy(version: version)
+            },
+            scope: .singleton
+        )
+
+        /// When
+
+        let instance1: AppConfigurationDummy? = container.resolve(
+            type: AppConfigurationDummy.self,
+            arguments: "1.0.0"
+        )
+        
+        let instance2: AppConfigurationDummy? = container.resolve(type: AppConfigurationDummy.self)
+        
+        /// Then
+        XCTAssertTrue(
+            instance1 == instance2,
+            "Singleton scope should return the same instance"
+        )
+
+    }
+    
+    func testTransientScopeWithSingleparameter() {
+        
+        /// Given
+        let container = DependencyContainer()
+
+        container.register(
+            type: AppConfigurationDummy.self,
+            factory: { args in
+                guard let version = args.first as? String else { fatalError("Invalid arguments") }
+                
+                return AppConfigurationDummy(version: version)
+            },
+            scope: .transient
+        )
+
+        /// When
+
+        let instance1: AppConfigurationDummy? = container.resolve(
+            type: AppConfigurationDummy.self,
+            arguments: "1.0.0"
+        )
+        
+        let instance2: AppConfigurationDummy? = container.resolve(
+            type: AppConfigurationDummy.self,
+            arguments: "2.0.0"
+        )
+        
+        /// Then
+        
+        XCTAssertNotEqual(
+            instance1,
+            instance2,
+            "Transient scope should create a new instance each time"
+        )
+    }
+    
     
     func testTransientScopeWithMultipleParameters() {
         /// Given
