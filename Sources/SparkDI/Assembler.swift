@@ -3,18 +3,18 @@
 //
 import Foundation
 
-final class Assembler {
+public final class Assembler {
     private let container: DependencyContainer
     
-    init(container: DependencyContainer) {
+    public init(container: DependencyContainer) {
         self.container = container
     }
     
-    func apply(modules: [Module]) {
+    public func apply(modules: [Module]) {
         modules.forEach { $0.registerDependencies(in: container) }
     }
     
-    func resolve<T>(_ type: T.Type, arguments: Any...) -> T? {
+    public func resolve<T>(_ type: T.Type, arguments: Any...) -> T? {
         container.resolve(type: type,arguments: arguments)
     }
 }

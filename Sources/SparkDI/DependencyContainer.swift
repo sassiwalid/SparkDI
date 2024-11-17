@@ -1,17 +1,22 @@
 //
 //  Copyright © 2024 SparkDI Contributors. All rights reserved.
 //
-enum Scope {
+public enum Scope {
+
     case singleton
+
     case transient
+
 }
 
-final class DependencyContainer {
+public final class DependencyContainer {
     private var dependencies: [ObjectIdentifier: ([Any]) -> Any] = [:]
 
     private var sharedInstances: [ObjectIdentifier: Any] = [:]
     
-    func register<T>(
+    public init() {}
+    
+    public func register<T>(
         type: T.Type,
         factory: @escaping ([Any])-> T,
         scope: Scope = .transient
@@ -25,7 +30,7 @@ final class DependencyContainer {
         }
     }
     
-    func resolve<T>(
+    public func resolve<T>(
         type: T.Type,
         arguments: Any...
     ) -> T? {
