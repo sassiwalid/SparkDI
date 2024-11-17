@@ -1,9 +1,7 @@
+//  
+//  Copyright © 2024 SparkDI Contributors. All rights reserved.
 //
-//  DemoApplicationTests.swift
-//  DemoApplicationTests
-//
-//  Created by Walid SASSI on 17/11/2024.
-//
+
 
 import Testing
 

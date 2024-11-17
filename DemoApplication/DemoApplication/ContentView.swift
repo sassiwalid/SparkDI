@@ -1,9 +1,7 @@
+//  
+//  Copyright © 2024 SparkDI Contributors. All rights reserved.
 //
-//  ContentView.swift
-//  DemoApplication
-//
-//  Created by Walid SASSI on 17/11/2024.
-//
+
 
 import SwiftUI
 import SparkDI

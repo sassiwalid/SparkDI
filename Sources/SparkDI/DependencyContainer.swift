@@ -1,6 +1,7 @@
-//
+//  
 //  Copyright © 2024 SparkDI Contributors. All rights reserved.
 //
+
 public enum Scope {
 
     case singleton
