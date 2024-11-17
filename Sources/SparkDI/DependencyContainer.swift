@@ -40,31 +40,30 @@ public final class DependencyContainer {
         type: T.Type,
         arguments: Any...
     ) -> T? {
+    
         let key = ObjectIdentifier(type)
 
-        if let dependency = dependencies[key] {
+        guard let dependency = dependencies[key] else { return nil }
 
-            switch dependency.scope {
+        switch dependency.scope {
 
-            case .singleton:
+        case .singleton:
 
-                if let shared = sharedInstances[key] as? T {
-                    return shared
-                }
-                
-                let instance = dependency.factory(arguments) as? T
-                
-                sharedInstances[key] = instance
-                
-                return instance
-                
-            case .transient:
-                
-                return dependency.factory(arguments) as? T
+            if let sharedInstance = sharedInstances[key] as? T {
+                return sharedInstance
             }
+
+            let sharedInstance = dependency.factory(arguments) as? T
+
+            sharedInstances[key] = sharedInstance
+
+            return sharedInstance
+
+        case .transient:
+
+            return dependency.factory(arguments) as? T
         }
 
-        return nil
-
     }
+
 }
