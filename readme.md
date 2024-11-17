@@ -13,7 +13,7 @@ SparkDI is a dependency injection framework in Swift, designed for speed and per
 Add SparkDI via Swift Package Manager:
 ```swift
 dependencies: [
-    .package(url: "https://github.com/your-username/SparkDI.git", from: "0.1.0")
+    .package(url: "https://github.com/sassi-walid/SparkDI.git", from: "0.1.0")
 ]
 ```
 ##  Basic Usage
