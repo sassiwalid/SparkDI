@@ -11,41 +11,59 @@ public enum Scope {
 }
 
 public final class DependencyContainer {
-    private var dependencies: [ObjectIdentifier: ([Any]) -> Any] = [:]
+
+    private struct Dependency {
+        let factory: ([Any]) -> Any
+        let scope: Scope
+    }
+
+    private var dependencies: [ObjectIdentifier: Dependency] = [:]
 
     private var sharedInstances: [ObjectIdentifier: Any] = [:]
-    
+
     public init() {}
-    
+
     public func register<T>(
         type: T.Type,
-        factory: @escaping ([Any])-> T,
+        factory: @escaping ([Any]) -> T,
         scope: Scope = .transient
     ) {
         let key = ObjectIdentifier(type)
-        
-        dependencies[key] = factory
-        
-        if scope == .singleton {
-            sharedInstances[key] = factory([])
-        }
+
+        dependencies[key] = Dependency(
+            factory: factory,
+            scope: scope
+        )
     }
     
     public func resolve<T>(
         type: T.Type,
         arguments: Any...
     ) -> T? {
+    
         let key = ObjectIdentifier(type)
-        
-        if let sharedInstance = sharedInstances[key] {
-            return sharedInstance as? T
+
+        guard let dependency = dependencies[key] else { return nil }
+
+        switch dependency.scope {
+
+        case .singleton:
+
+            if let sharedInstance = sharedInstances[key] as? T {
+                return sharedInstance
+            }
+
+            let sharedInstance = dependency.factory(arguments) as? T
+
+            sharedInstances[key] = sharedInstance
+
+            return sharedInstance
+
+        case .transient:
+
+            return dependency.factory(arguments) as? T
         }
-        
-        if let factory = dependencies[key] {
-            return factory(arguments) as? T
-        }
-        
-        return nil
-        
+
     }
+
 }
