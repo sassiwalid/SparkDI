@@ -34,13 +34,13 @@ public final class DependencyContainer {
         let key = ObjectIdentifier(type)
 
         lock.lock()
+        
+        defer { lock.unlock() }
 
         dependencies[key] = Dependency(
             factory: factory,
             scope: scope
         )
-
-        lock.unlock()
 
     }
     
