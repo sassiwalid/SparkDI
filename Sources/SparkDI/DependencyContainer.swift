@@ -1,6 +1,7 @@
 //  
 //  Copyright © 2024 SparkDI Contributors. All rights reserved.
 //
+import Foundation
 
 public enum Scope {
 
@@ -20,6 +21,8 @@ public final class DependencyContainer {
     private var dependencies: [ObjectIdentifier: Dependency] = [:]
 
     private var sharedInstances: [ObjectIdentifier: Any] = [:]
+    
+    private let lock = NSLock()
 
     public init() {}
 
@@ -30,10 +33,15 @@ public final class DependencyContainer {
     ) {
         let key = ObjectIdentifier(type)
 
+        lock.lock()
+
         dependencies[key] = Dependency(
             factory: factory,
             scope: scope
         )
+
+        lock.unlock()
+
     }
     
     public func resolve<T>(
