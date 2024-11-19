@@ -174,7 +174,6 @@ To ensure SparkDI is thread-safe, we added a mutex (NSLock) to manage concurrent
 ## Future Improvements
 
     •    Additional scope options for more flexible dependency management
-    •    Expanded type safety and error handling
 
 License
 
