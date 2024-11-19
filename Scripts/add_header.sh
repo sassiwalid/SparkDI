@@ -8,7 +8,6 @@ DEMO_DIR="DemoApplication"
 HEADER="//  
 //  Copyright © 2024 SparkDI Contributors. All rights reserved.
 //
-
 "
 
 add_or_replace_header() {

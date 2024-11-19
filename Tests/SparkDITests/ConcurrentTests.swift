@@ -1,8 +1,5 @@
-//
-//  ConcurrentTests.swift
-//  SparkDI
-//
-//  Created by Walid SASSI on 19/11/2024.
+//  
+//  Copyright © 2024 SparkDI Contributors. All rights reserved.
 //
 
 #if canImport(Testing)
