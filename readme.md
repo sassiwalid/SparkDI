@@ -161,6 +161,16 @@ let userService: UserService? = assembler.resolve(type: UserService.self)
 
 ```
 
+## Thread-Safety with Mutex
+
+To ensure SparkDI is thread-safe, we added a mutex (NSLock) to manage concurrent access to the dependency container. This guarantees that simultaneous reads and writes to the container do not cause race conditions or crashes.
+
+### Why Use a Mutex?
+
+    •    Thread-Safety: Prevents crashes caused by simultaneous read/write operations on the container.
+    •    Data Integrity: Ensures the container remains in a consistent state, even under heavy concurrent access.
+    •    Ease of Use: Using defer ensures the lock is always released, reducing the chance of deadlocks.
+
 ## Future Improvements
 
     •    Additional scope options for more flexible dependency management
