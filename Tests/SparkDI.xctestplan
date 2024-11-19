@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "D3FA0528-35A9-412D-85C6-DE1D7A4F1D22",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testExecutionOrdering" : "random"
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "SparkDITests",
+        "name" : "SparkDITests"
+      }
+    }
+  ],
+  "version" : 1
+}
