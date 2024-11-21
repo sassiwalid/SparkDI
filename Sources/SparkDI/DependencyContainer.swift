@@ -11,7 +11,7 @@ public enum Scope {
 
 }
 
-public final class DependencyContainer {
+public actor DependencyContainer {
 
     private struct Dependency {
         let factory: ([Any]) -> Any
@@ -32,10 +32,6 @@ public final class DependencyContainer {
         scope: Scope = .transient
     ) {
         let key = ObjectIdentifier(type)
-
-        lock.lock()
-        
-        defer { lock.unlock() }
 
         dependencies[key] = Dependency(
             factory: factory,

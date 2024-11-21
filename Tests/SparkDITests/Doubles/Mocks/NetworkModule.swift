@@ -5,14 +5,14 @@
 @testable import SparkDI
 struct NetworkModule: Module {
 
-    func registerDependencies(in container: SparkDI.DependencyContainer) {
-        container.register(
+    func registerDependencies(in container: SparkDI.DependencyContainer) async {
+        await container.register(
             type: APIServiceDummy.self,
             factory: { _ in  APIServiceDummy()
             },
             scope: .singleton)
         
-        container.register(
+        await container.register(
             type: NetworkManagerDummy.self,
             factory: { _ in  NetworkManagerDummy()
             },

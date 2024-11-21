@@ -11,11 +11,15 @@ public final class Assembler {
         self.container = container
     }
     
-    public func apply(modules: [Module]) {
-        modules.forEach { $0.registerDependencies(in: container) }
+    public func apply(modules: [Module]) async {
+
+        for module in modules {
+            await module.registerDependencies(in: container)
+        }
     }
     
-    public func resolve<T>(_ type: T.Type, arguments: Any...) -> T? {
-        container.resolve(type: type,arguments: arguments)
+    public func resolve<T>(_ type: T.Type, arguments: Any...) async-> T? {
+
+    await container.resolve(type: type,arguments: arguments)
     }
 }
