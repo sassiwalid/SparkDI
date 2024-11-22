@@ -34,6 +34,24 @@ struct SparkDIConcurrentTests {
             expectation()
         }
     }
+    
+    func ConcurrentReadCrash() async throws {
+        let container = DependencyContainer()
+        
+        await confirmation("…") { expectation in
+
+            let iterations = 1000
+
+            DispatchQueue.concurrentPerform(iterations: iterations) { index in
+                Task {
+                    _ = await container.resolve(type: String.self)
+                }
+
+            }
+
+            expectation()
+        }
+    }
 }
 #endif
 
@@ -54,6 +72,25 @@ final class ConcurrentTests: XCTestCase {
                     },
                     scope: .transient
                 )
+            }
+        }
+        
+        expectation.fulfill()
+        
+        wait(for: [expectation], timeout: 5)
+    }
+    
+    func testConcurrentReadCrash() throws {
+        let container = DependencyContainer()
+        
+        let expectation = XCTestExpectation(description: "Concurrent read should cause crash (1000 iterations)")
+        
+        let iterations = 1000
+
+        DispatchQueue.concurrentPerform(iterations: iterations) { index in
+            Task {
+                _ = await container.resolve(type: String.self)
+    
             }
         }
         
