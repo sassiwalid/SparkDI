@@ -21,8 +21,6 @@ public actor DependencyContainer {
     private var dependencies: [ObjectIdentifier: Dependency] = [:]
 
     private var sharedInstances: [ObjectIdentifier: Any] = [:]
-    
-    private let lock = NSLock()
 
     public init() {}
 
