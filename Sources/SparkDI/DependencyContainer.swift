@@ -1,6 +1,7 @@
 //  
 //  Copyright © 2024 SparkDI Contributors. All rights reserved.
 //
+import Foundation
 
 public enum Scope {
 
@@ -10,7 +11,7 @@ public enum Scope {
 
 }
 
-public final class DependencyContainer {
+public actor DependencyContainer {
 
     private struct Dependency {
         let factory: ([Any]) -> Any
@@ -34,6 +35,7 @@ public final class DependencyContainer {
             factory: factory,
             scope: scope
         )
+
     }
     
     public func resolve<T>(

@@ -15,7 +15,7 @@ struct DependencyInjectionTests {
         /// Given
         let container = DependencyContainer()
 
-        container.register(
+        await container.register(
             type: String.self,
             factory: { _ in
                 "Singleton instance"
@@ -23,8 +23,8 @@ struct DependencyInjectionTests {
             scope: .singleton
         )
         /// When
-        let instance1: String? = container.resolve(type: String.self)
-        let instance2: String? = container.resolve(type: String.self)
+        let instance1: String? = await container.resolve(type: String.self)
+        let instance2: String? = await container.resolve(type: String.self)
         
         /// Then
         #expect(instance1 == instance2)
@@ -34,7 +34,7 @@ struct DependencyInjectionTests {
         /// Given
         let container = DependencyContainer()
 
-        container.register(
+        await container.register(
             type: String.self,
             factory: { _ in
                 UUID().uuidString
@@ -44,8 +44,8 @@ struct DependencyInjectionTests {
 
         /// When
 
-        let instance1: String? = container.resolve(type: String.self)
-        let instance2: String? = container.resolve(type: String.self)
+        let instance1: String? = await container.resolve(type: String.self)
+        let instance2: String? = await container.resolve(type: String.self)
         
         /// Then
         #expect(instance1 != instance2)
@@ -56,7 +56,7 @@ struct DependencyInjectionTests {
         /// Given
         let container = DependencyContainer()
 
-        container.register(
+        await container.register(
             type: AppConfigurationDummy.self,
             factory: { args in
                 guard let version = args.first as? String else { fatalError("Invalid arguments") }
@@ -68,12 +68,12 @@ struct DependencyInjectionTests {
 
         /// When
 
-        let instance1: AppConfigurationDummy? = container.resolve(
+        let instance1: AppConfigurationDummy? = await container.resolve(
             type: AppConfigurationDummy.self,
             arguments: "1.0.0"
         )
         
-        let instance2: AppConfigurationDummy? = container.resolve(type: AppConfigurationDummy.self)
+        let instance2: AppConfigurationDummy? = await container.resolve(type: AppConfigurationDummy.self)
         
         /// Then
         #expect(instance1 == instance2)
@@ -84,7 +84,7 @@ struct DependencyInjectionTests {
         /// Given
         let container = DependencyContainer()
 
-        container.register(
+        await container.register(
             type: AppConfigurationDummy.self,
             factory: { args in
                 guard let version = args.first as? String else { fatalError("Invalid arguments") }
@@ -96,12 +96,12 @@ struct DependencyInjectionTests {
 
         /// When
 
-        let instance1: AppConfigurationDummy? = container.resolve(
+        let instance1: AppConfigurationDummy? = await container.resolve(
             type: AppConfigurationDummy.self,
             arguments: "1.0.0"
         )
         
-        let instance2: AppConfigurationDummy? = container.resolve(
+        let instance2: AppConfigurationDummy? = await container.resolve(
             type: AppConfigurationDummy.self,
             arguments: "2.0.0"
         )
@@ -115,7 +115,7 @@ struct DependencyInjectionTests {
         /// Given
         let container = DependencyContainer()
 
-        container.register(
+        await container.register(
             type: String.self,
             factory: { args in
                 guard let name = args[0] as? String, let age = args[1] as? Int else {
@@ -128,7 +128,7 @@ struct DependencyInjectionTests {
 
         /// When
         
-        let instance: String? = container.resolve(
+        let instance: String? = await container.resolve(
             type: String.self,
             arguments: ["John", 25]
         )
@@ -143,16 +143,16 @@ struct DependencyInjectionTests {
 
 final class DependencyContainerTests: XCTestCase {
 
-    func testSingletonScopeWithoutParameter() {
+    func testSingletonScopeWithoutParameter() async {
         /// Given
         let container = DependencyContainer()
 
         /// When
-        container.register(type: String.self, factory: { _ in  "Singleton Instance" }, scope: .singleton)
+        await container.register(type: String.self, factory: { _ in  "Singleton Instance" }, scope: .singleton)
 
         // Then
-        let instance1: String? = container.resolve(type: String.self)
-        let instance2: String? = container.resolve(type: String.self)
+        let instance1: String? = await container.resolve(type: String.self)
+        let instance2: String? = await container.resolve(type: String.self)
 
         XCTAssertTrue(
             instance1 == instance2,
@@ -161,11 +161,11 @@ final class DependencyContainerTests: XCTestCase {
 
     }
     
-    func testTransientScopeWithoutParameter() {
+    func testTransientScopeWithoutParameter() async {
         /// Given
         let container = DependencyContainer()
 
-        container.register(
+        await container.register(
             type: String.self,
             factory: { _ in UUID().uuidString
             },
@@ -174,8 +174,8 @@ final class DependencyContainerTests: XCTestCase {
         
         /// When
 
-        let instance1: String? = container.resolve(type: String.self)
-        let instance2: String? = container.resolve(type: String.self)
+        let instance1: String? = await container.resolve(type: String.self)
+        let instance2: String? = await container.resolve(type: String.self)
 
         /// Then
 
@@ -186,12 +186,12 @@ final class DependencyContainerTests: XCTestCase {
         )
     }
     
-    func testSingletonScopeWithSingleParameter() {
+    func testSingletonScopeWithSingleParameter() async {
         
         /// Given
         let container = DependencyContainer()
 
-        container.register(
+        await container.register(
             type: AppConfigurationDummy.self,
             factory: { args in
                 guard let version = args.first as? String else { fatalError("Invalid arguments") }
@@ -203,12 +203,12 @@ final class DependencyContainerTests: XCTestCase {
 
         /// When
 
-        let instance1: AppConfigurationDummy? = container.resolve(
+        let instance1: AppConfigurationDummy? = await container.resolve(
             type: AppConfigurationDummy.self,
             arguments: "1.0.0"
         )
         
-        let instance2: AppConfigurationDummy? = container.resolve(type: AppConfigurationDummy.self)
+        let instance2: AppConfigurationDummy? = await container.resolve(type: AppConfigurationDummy.self)
         
         /// Then
         XCTAssertTrue(
@@ -217,13 +217,13 @@ final class DependencyContainerTests: XCTestCase {
         )
 
     }
-    
-    func testTransientScopeWithSingleparameter() {
+
+    func testTransientScopeWithSingleparameter() async {
         
         /// Given
         let container = DependencyContainer()
 
-        container.register(
+        await container.register(
             type: AppConfigurationDummy.self,
             factory: { args in
                 guard let version = args.first as? String else { fatalError("Invalid arguments") }
@@ -235,12 +235,12 @@ final class DependencyContainerTests: XCTestCase {
 
         /// When
 
-        let instance1: AppConfigurationDummy? = container.resolve(
+        let instance1: AppConfigurationDummy? = await container.resolve(
             type: AppConfigurationDummy.self,
             arguments: "1.0.0"
         )
         
-        let instance2: AppConfigurationDummy? = container.resolve(
+        let instance2: AppConfigurationDummy? = await container.resolve(
             type: AppConfigurationDummy.self,
             arguments: "2.0.0"
         )
@@ -255,11 +255,11 @@ final class DependencyContainerTests: XCTestCase {
     }
     
     
-    func testTransientScopeWithMultipleParameters() {
+    func testTransientScopeWithMultipleParameters() async {
         /// Given
         let container = DependencyContainer()
 
-        container.register(
+        await container.register(
             type: String.self,
             factory: { args in
                 guard let name = args[0] as? String, let age = args[1] as? Int else {
@@ -272,7 +272,7 @@ final class DependencyContainerTests: XCTestCase {
 
         /// When
 
-        let instance: String? = container.resolve(
+        let instance: String? = await container.resolve(
             type: String.self,
             arguments: ["John", 25]
         )

@@ -10,27 +10,27 @@ import XCTest
 
 #if canImport(Testing)
 struct AssemblerTests {
-    @Test func assemblerWithMultipleModules() {
+    @Test func assemblerWithMultipleModules() async {
         /// GIVEN
         let container = DependencyContainer()
         let assembler = Assembler(container: container)
-        assembler.apply(
+        await assembler.apply(
             modules: [NetworkModule(), UserModule()]
         )
 
         /// WHEN
 
         // resolve Network module dependencies (singletons case)
-        let apiService1 = container.resolve(type: APIServiceDummy.self)
-        let apiService2 = container.resolve(type: APIServiceDummy.self)
+        let apiService1 = await container.resolve(type: APIServiceDummy.self)
+        let apiService2 = await container.resolve(type: APIServiceDummy.self)
         
-        let networkManager1 = container.resolve(type: NetworkManagerDummy.self)
-        let networkManager2 = container.resolve(type: NetworkManagerDummy.self)
+        let networkManager1 = await container.resolve(type: NetworkManagerDummy.self)
+        let networkManager2 = await container.resolve(type: NetworkManagerDummy.self)
         
         // resolve user module dependencies (new instance case)
         
-        let userService1 = container.resolve(type: UserServiceDummy.self)
-        let userService2 = container.resolve(type: UserServiceDummy.self)
+        let userService1 = await container.resolve(type: UserServiceDummy.self)
+        let userService2 = await container.resolve(type: UserServiceDummy.self)
 
         /// THEN
 
@@ -43,24 +43,24 @@ struct AssemblerTests {
 
 final class AssemblerXCTests: XCTestCase {
     
-    func testAssemblerWithMultipleModules() {
+    func testAssemblerWithMultipleModules() async {
         let container = DependencyContainer()
         let assembler = Assembler(container: container)
-        assembler.apply(
+        await assembler.apply(
             modules: [NetworkModule(), UserModule()]
         )
         
         // resolve Network module dependencies (singletons case)
-        let apiService1 = container.resolve(type: APIServiceDummy.self)
-        let apiService2 = container.resolve(type: APIServiceDummy.self)
+        let apiService1 = await container.resolve(type: APIServiceDummy.self)
+        let apiService2 = await container.resolve(type: APIServiceDummy.self)
         
-        let networkManager1 = container.resolve(type: NetworkManagerDummy.self)
-        let networkManager2 = container.resolve(type: NetworkManagerDummy.self)
+        let networkManager1 = await container.resolve(type: NetworkManagerDummy.self)
+        let networkManager2 = await container.resolve(type: NetworkManagerDummy.self)
         
         // resolve user module dependencies (new instance case)
         
-        let userService1 = container.resolve(type: UserServiceDummy.self)
-        let userService2 = container.resolve(type: UserServiceDummy.self)
+        let userService1 = await container.resolve(type: UserServiceDummy.self)
+        let userService2 = await container.resolve(type: UserServiceDummy.self)
         
         XCTAssertTrue(apiService1 === apiService2)
         XCTAssertTrue(networkManager1 === networkManager2)
