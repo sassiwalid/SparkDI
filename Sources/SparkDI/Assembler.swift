@@ -6,7 +6,7 @@ import Foundation
 
 public final class Assembler {
 
-    private let container: DependencyContainer
+    let container: DependencyContainer
 
     public init(container: DependencyContainer) {
         self.container = container
