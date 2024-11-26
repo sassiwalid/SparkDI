@@ -1,8 +1,10 @@
 import Foundation
 
 @propertyWrapper
-struct Injected<T> {
+struct Dependency<T> {
+
     private var instance: T?
+
     let assembler: Assembler
     
     mutating func resolve() async {
@@ -10,9 +12,11 @@ struct Injected<T> {
     }
 
     var wrappedValue: T {
-         if instance == nil {
+
+        if instance == nil {
              fatalError("dependency must be resolved asynchronously using resolve")
         }
+
         return instance!
     }
 
