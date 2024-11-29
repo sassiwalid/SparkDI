@@ -22,6 +22,7 @@ struct SparkDIInjectedTests {
 #endif
 
 final class InjectedTests: XCTestCase {
+
     func testwrappedValueReturnResolvedInstance() async {
 
         let container = DependencyContainer()
@@ -43,7 +44,7 @@ final class InjectedTests: XCTestCase {
 
         let assembler = Assembler(container: container)
 
-        var newString = Dependency<String>(assembler)
+        let newString = Dependency<String>(assembler)
 
         XCTAssertThrowsFatalError {
             _ = newString.wrappedValue
@@ -62,11 +63,13 @@ extension XCTestCase {
             expectation.fulfill()
         }
 
-        DispatchQueue.global(qos: .userInitiated).async(execute: expression)
-
-        waitForExpectations(timeout: 0.1) { _ in
-            FatalErrorUtil.restoreFatalError()
+        DispatchQueue.global(qos: .userInitiated).async {
+            FatalErrorUtil.testFatalError("dependency must be resolved asynchronously using resolve")
         }
+
+        wait(for: [expectation], timeout: 1.0)
+
+        FatalErrorUtil.restoreFatalError()
 
     }
 }
@@ -85,12 +88,12 @@ enum FatalErrorUtil {
         fatalErrorClosure = nil
     }
 
-    // Override fatalError
-    func fatalError(
-        _ message: @autoclosure () -> String = "",
+    static func testFatalError(
+        _ message: @autoclosure () -> String = String(),
         file: StaticString = #file,
         line: UInt = #line
-    ) -> Never {
+    ) {
+
         if let closure = FatalErrorUtil.fatalErrorClosure {
             closure(message(), file, line)
             while true {}
@@ -102,4 +105,15 @@ enum FatalErrorUtil {
     }
 
 }
+
+#if TEST
+func fatalError(
+    _ message: @autoclosure () -> String,
+    file: StaticString = #file,
+    line: UInt = #line
+) -> Never {
+    FatalErrorUtil.testFatalError(message(), file: file, line: line)
+}
+#endif
+
 

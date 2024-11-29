@@ -13,11 +13,11 @@ struct Dependency<T> {
 
     var wrappedValue: T {
 
-        if instance == nil {
+        guard let instance = instance else {
              fatalError("dependency must be resolved asynchronously using resolve")
         }
 
-        return instance!
+        return instance
     }
 
     init(_ assembler: Assembler) {
