@@ -167,7 +167,6 @@ To ensure SparkDI is thread-safe, we added a mutex (NSLock) to manage concurrent
 
 ### Why Use a Mutex?
 
-    •    Thread-Safety: Prevents crashes caused by simultaneous read/write operations on the container.
     •    Data Integrity: Ensures the container remains in a consistent state, even under heavy concurrent access.
     •    Ease of Use: Using defer ensures the lock is always released, reducing the chance of deadlocks.
 
