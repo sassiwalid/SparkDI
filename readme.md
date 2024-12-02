@@ -3,13 +3,16 @@
 SparkDI is a dependency injection framework in Swift, designed for speed and performance, inspired by industry best practices. It aims to provide a simple and efficient dependency injection solution for Swift projects, with support for scopes and flexible dependency resolution.
 
 ## Features
-- Constructor, property, and method dependency injection
-- Scope management (Singleton, Transient)
-- Easy and flexible configuration
-- Modular dependency registration using an `Assembler` with multiple modules
-- Support for resolving dependencies with multiple arguments
+
+    •    Constructor, Property, and Method Dependency Injection
+    •    Scope Management: Singleton and Transient
+    •    Property Wrapper Support: Use @Dependency for cleaner, safer dependency injection
+    •    Actor-Based Thread Safety: Modern Swift Concurrency for managing concurrent access
+    •    Modular Dependency Registration: Organize and manage dependencies with an Assembler and modules
+    •    Support for Dependencies with Multiple Arguments
 
 ## Installation
+
 Add SparkDI via Swift Package Manager:
 ```swift
 dependencies: [
@@ -32,10 +35,10 @@ To register a dependency, use the register method. You can specify the type, a f
 ```swift
 
 // Registering a singleton instance
-container.register(type: String.self, instance: { "Singleton Instance" }, scope: .singleton)
+await container.register(type: String.self, instance: { "Singleton Instance" }, scope: .singleton)
 
 // Registering a transient instance
-container.register(type: Int.self, instance: { 42 }, scope: .transient)
+await container.register(type: Int.self, instance: { 42 }, scope: .transient)
 
 ```
     •    .singleton scope creates the instance once and reuses it for every resolution.
@@ -48,11 +51,11 @@ To get an instance of a dependency, use the resolve method:
 ```swift
 
 // Resolving the singleton instance
-let singletonString: String? = container.resolve(type: String.self)
+let singletonString: String? = await container.resolve(type: String.self)
 print(singletonString) // Output: Singleton Instance
 
 // Resolving the transient instance
-let transientInt: Int? = container.resolve(type: Int.self)
+let transientInt: Int? = await container.resolve(type: Int.self)
 print(transientInt) // Output: 42
 
 ```
@@ -66,7 +69,7 @@ You can register a dependency that requires multiple arguments by using a factor
 
 ```swift
 
-container.register(
+await container.register(
    type: String.self,
    factory: { args in
 
@@ -87,7 +90,7 @@ When resolving a dependency that requires arguments, pass the arguments in the r
 
 ```swift
 
-let instance: String? = container.resolve(
+let instance: String? = await container.resolve(
     type: String.self,
     arguments: ["Mohamed", 40]
 )
@@ -109,13 +112,13 @@ struct NetworkModule: Module {
 
  func registerDependencies(in container: DependencyContainer) {
 
-    container.register(
+    await container.register(
     type: APIService.self,
     instance: { APIService() },
     scope: .singleton
     )
 
-    container.register(
+    await container.register(
     type: NetworkManager.self,
     instance: { NetworkManager() },
     scope: .transient
@@ -128,13 +131,13 @@ struct NetworkModule: Module {
 struct UserModule: Module {
   func registerDependencies(in container: DependencyContainer) {
     
-    container.register(
+    await container.register(
         type: UserService.self,
         instance: { UserService() },
         scope: .singleton
     )
 
-    container.register(
+    await container.register(
         type: UserSession.self,
         instance: { UserSession() }, 
         scope: .transient
@@ -155,25 +158,64 @@ let assembler = Assembler()
 assembler.apply(modules: [NetworkModule(), UserModule()])
 
 // Resolving dependencies
-let apiService: APIService? = assembler.resolve(type: APIService.self)
+let apiService: APIService? = await assembler.resolve(type: APIService.self)
 
-let userService: UserService? = assembler.resolve(type: UserService.self)
+let userService: UserService? = await assembler.resolve(type: UserService.self)
 
 ```
 
-## Thread-Safety with Mutex
+## Using the @Dependency Property Wrapper
 
-To ensure SparkDI is thread-safe, we added a mutex (NSLock) to manage concurrent access to the dependency container. This guarantees that simultaneous reads and writes to the container do not cause race conditions or crashes.
+The @Dependency property wrapper simplifies dependency injection in classes, structs, or views. It integrates seamlessly with the assembler.
 
-### Why Use a Mutex?
+Step 1: Define a Class with Dependencies
+```swift
+class ViewController {
+    @Dependency(assembler) var service: SomeService
 
-    •    Data Integrity: Ensures the container remains in a consistent state, even under heavy concurrent access.
-    •    Ease of Use: Using defer ensures the lock is always released, reducing the chance of deadlocks.
+    func load() async {
+        await $service.resolve() // Asynchronously resolve the dependency
+        service.performAction()
+    }
+}
+
+```
+Step 2: Configure Dependencies
+```swift
+let container = DependencyContainer()
+let assembler = Assembler(container: container)
+
+Task {
+    await container.register(SomeService.self) { SomeService() }
+
+    let viewController = ViewController()
+    await viewController.load() // Output: Service is performing an action!
+}
+
+```
+
+Advantages of the @Dependency Property Wrapper and Actor-Based Thread Safety
+
+    •    Simplified Code: The property wrapper reduces boilerplate for dependency injection.
+    •    Concurrent Safety: Actors protect shared state, ensuring stability during heavy multithreading.
+    •    Asynchronous Compatibility: Both @Dependency and actors work natively with Swift’s async/await.
+
+## Actor-Based Thread Safety
+
+SparkDI uses actors instead of NSLock or other manual synchronization mechanisms to ensure thread safety.
+Why Use Actors?
+
+    •    Automatic Synchronization: Actors serialize access to their state, ensuring thread safety without requiring manual locks.
+    •    Modern Concurrency: Aligns with Swift’s concurrency model (async/await) for safer, more scalable multithreading.
+    •    Performance: Actors reduce the risk of deadlocks and race conditions, improving stability under heavy concurrent access.
+
 
 ## Future Improvements
 
-    •    Additional scope options for more flexible dependency management
+    •   Additional scope options for more flexible dependency management.
+    •   Enhanced error handling (replace fatalError with throw for better debugging).
+    •   Optimizations for larger dependency graphs.
 
-License
+## License
 
 MIT License
