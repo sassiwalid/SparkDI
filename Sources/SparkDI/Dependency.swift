@@ -3,7 +3,7 @@ import Foundation
 @propertyWrapper
 struct Dependency<T> {
 
-    private var instance: T?
+    var instance: T?
 
     let assembler: Assembler
     
@@ -24,6 +24,15 @@ struct Dependency<T> {
 
         self.assembler = assembler
 
+    }
+
+    func getOrThrow() throws -> T {
+        guard let instance = instance else {
+            throw DependencyError.unresolvedDependency(type: String(describing: T.self))
+            
+        }
+
+        return instance
     }
 
 }
