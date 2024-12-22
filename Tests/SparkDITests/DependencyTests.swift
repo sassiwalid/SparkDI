@@ -18,6 +18,36 @@ struct SparkDIInjectedTests {
         
         #expect(newInt.wrappedValue == 1)
     }
+    
+    @Test func unresolvedDependencyShouldThrowsErrorWhenCallGetOrThrow() {
+
+        let container = DependencyContainer()
+
+        let assembler = Assembler(container: container)
+
+        var newInt: Dependency<Int> = Dependency<Int>(assembler)
+
+        newInt.resolve(with: 2)
+
+        let instance = try? newInt.getOrThrow()
+
+        #expect(instance == 2)
+    }
+    
+    @Test func resolvedDependencyShouldNotThrowsErrorWhenCallGetOrThrow() {
+        let container = DependencyContainer()
+
+        let assembler = Assembler(container: container)
+
+        let newInt = Dependency<Int>(assembler)
+
+        #expect{ try newInt.getOrThrow() } throws: { error in
+            (error as? DependencyError) == .unresolvedDependency(type: "Int")
+        }
+        
+    }
+    
+    
 }
 #endif
 
