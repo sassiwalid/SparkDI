@@ -213,7 +213,6 @@ Why Use Actors?
 ## Future Improvements
 
     •   Additional scope options for more flexible dependency management.
-    •   Enhanced error handling (replace fatalError with throw for better debugging).
     •   Optimizations for larger dependency graphs.
 
 ## License

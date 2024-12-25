@@ -18,6 +18,36 @@ struct SparkDIInjectedTests {
         
         #expect(newInt.wrappedValue == 1)
     }
+    
+    @Test func unresolvedDependencyShouldThrowsErrorWhenCallGetOrThrow() {
+
+        let container = DependencyContainer()
+
+        let assembler = Assembler(container: container)
+
+        var newInt: Dependency<Int> = Dependency<Int>(assembler)
+
+        newInt.resolve(with: 2)
+
+        let instance = try? newInt.getOrThrow()
+
+        #expect(instance == 2)
+    }
+    
+    @Test func resolvedDependencyShouldNotThrowsErrorWhenCallGetOrThrow() {
+        let container = DependencyContainer()
+
+        let assembler = Assembler(container: container)
+
+        let newInt = Dependency<Int>(assembler)
+
+        #expect{ try newInt.getOrThrow() } throws: { error in
+            (error as? DependencyError) == .unresolvedDependency(type: "Int")
+        }
+        
+    }
+    
+    
 }
 #endif
 
@@ -51,6 +81,42 @@ final class InjectedTests: XCTestCase {
         }
 
     }
+    
+    func testUnresolvedDependencyShouldThrowsErrorWhenCallGetOrThrow() async {
+        let container = DependencyContainer()
+
+        let assembler = Assembler(container: container)
+
+        var newInt: Dependency<Int> = Dependency<Int>(assembler)
+        
+        newInt.resolve(with: 2)
+
+        let instance = try? newInt.getOrThrow()
+        
+        XCTAssertEqual(instance, 2)
+        
+    }
+    
+    func testResolvedDependencyShouldNotThrowsErrorWhenCallGetOrThrow() {
+        let container = DependencyContainer()
+
+        let assembler = Assembler(container: container)
+
+        let newInt = Dependency<Int>(assembler)
+        
+        XCTAssertThrowsError(try newInt.getOrThrow()) { error in
+            XCTAssertEqual(error as? DependencyError, .unresolvedDependency(type: "Int"))
+        }
+        
+    }
+}
+
+extension Dependency {
+
+    mutating func resolve(with mockInstance: T) {
+        instance = mockInstance
+    }
+
 }
 
 extension XCTestCase {
