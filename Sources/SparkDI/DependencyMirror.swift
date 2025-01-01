@@ -8,25 +8,30 @@ struct DependencyMirror {
     let argumentTypes: [Any.Type]
     
     init(reflecting factory: Any) {
-       let typeString = String(describing: factory)
-
-        self.argumentTypes = Self.parseArgumentsTypes(from: typeString)
-    }
-
-    private static func parseArgumentsTypes(from typeString: String) -> [Any.Type] {
-        guard let argsStart = typeString.firstIndex(of: "("),
-              let argsEnd = typeString.firstIndex(of: ")")
-        else {
-            return []
+        
+        let factoryType = type(of: factory)
+        
+        let functionType = String(describing: factoryType)
+        
+        guard let argsStart = functionType.firstIndex(of: "("),
+              let argsEnd = functionType.firstIndex(of: ")") else {
+            self.argumentTypes = []
+            
+            return
         }
         
-        let argsString = String(typeString[argsStart..<argsEnd])
+        let argsString = String(functionType[argsStart..<argsEnd])
             .replacingOccurrences(of: "(", with: "")
             .replacingOccurrences(of: "[Any]", with: "")
-
-        return argsString
+        
+        self.argumentTypes = argsString
             .split(separator: ",")
-            .compactMap { TypeRegistry.shared.type(from: String($0).trimmingCharacters(in: .whitespaces))}
+            .compactMap { arg in
+                let typeName = arg.trimmingCharacters(in: .whitespaces)
+                return TypeRegistry.shared.type(from: typeName)
+            }
+        
     }
+
 }
 

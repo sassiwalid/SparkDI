@@ -6,7 +6,7 @@ import Foundation
 
 struct TypeRegistry {
 
-    static let shared = TypeRegistry()
+    static var shared = TypeRegistry()
 
     private var typeMap: [String: Any.Type] = [
         "Int": Int.self,
@@ -17,7 +17,7 @@ struct TypeRegistry {
         "Float": Float.self
     ]
 
-    mutating func register<T>(type: T.Type) {
+    mutating func register(type: Any.Type) {
         let typeName = String(describing: type)
 
         typeMap[typeName] = type
