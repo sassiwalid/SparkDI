@@ -96,17 +96,19 @@ public actor DependencyContainer {
     }
 
     private func detectCircularDependencies(for type: Any.Type) throws {
+
         var visited: Set<ObjectIdentifier> = []
-        
+
         var stack: Set<ObjectIdentifier> = []
-        
+
         func depthFirstSearch(_ currentType: Any.Type) throws {
+
             let currentId = ObjectIdentifier(currentType)
-            
+
             if stack.contains(currentId) {
                 throw DependencyError.circularDependency
             }
-            
+
             if visited.contains(currentId) {
                 return
             }
@@ -114,7 +116,7 @@ public actor DependencyContainer {
             visited.insert(currentId)
 
             stack.insert(currentId)
-            
+
             if let dependenciesId = dependencyGraph[currentId] {
                 for dependencyId in dependenciesId {
                     if let dependencyType = dependencies[dependencyId]?.dependencyTypes.first {
@@ -124,10 +126,9 @@ public actor DependencyContainer {
             }
             
             stack.remove(currentId)
-            
-            
+
         }
-        
+
         try depthFirstSearch(type)
     }
 
