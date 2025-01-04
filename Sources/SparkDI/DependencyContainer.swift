@@ -11,6 +11,11 @@ public enum Scope {
 
 }
 
+public enum DependencyError: Error {
+
+    case circularDependency
+}
+
 public actor DependencyContainer {
 
     private struct Dependency {
@@ -31,7 +36,7 @@ public actor DependencyContainer {
         type: T.Type,
         factory: @escaping ([Any]) -> T,
         scope: Scope = .transient
-    ) async {
+    ) async throws {
         
         await TypeRegistry.shared.register(type: T.self)
         
@@ -56,6 +61,8 @@ public actor DependencyContainer {
         )
         
         dependencyGraph[key] = dependencyIds
+        
+        try detectCircularDependencies(for: type)
     }
  
     public func resolve<T>(
@@ -86,6 +93,42 @@ public actor DependencyContainer {
             return dependency.factory(arguments) as? T
         }
 
+    }
+
+    private func detectCircularDependencies(for type: Any.Type) throws {
+        var visited: Set<ObjectIdentifier> = []
+        
+        var stack: Set<ObjectIdentifier> = []
+        
+        func depthFirstSearch(_ currentType: Any.Type) throws {
+            let currentId = ObjectIdentifier(currentType)
+            
+            if stack.contains(currentId) {
+                throw DependencyError.circularDependency
+            }
+            
+            if visited.contains(currentId) {
+                return
+            }
+            
+            visited.insert(currentId)
+
+            stack.insert(currentId)
+            
+            if let dependenciesId = dependencyGraph[currentId] {
+                for dependencyId in dependenciesId {
+                    if let dependencyType = dependencies[dependencyId]?.dependencyTypes.first {
+                        try depthFirstSearch(dependencyType)
+                    }
+                }
+            }
+            
+            stack.remove(currentId)
+            
+            
+        }
+        
+        try depthFirstSearch(type)
     }
 
 }

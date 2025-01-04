@@ -20,7 +20,7 @@ struct SparkDIConcurrentTests {
 
             DispatchQueue.concurrentPerform(iterations: iterations) { index in
                 Task {
-                    await container.register(
+                    try await container.register(
                         type: String.self,
                         factory: { _ in
                             "instance \(index)"
@@ -65,7 +65,7 @@ final class ConcurrentTests: XCTestCase {
 
         DispatchQueue.concurrentPerform(iterations: iterations) { index in
             Task {
-                await container.register(
+                try await container.register(
                     type: String.self,
                     factory: { _ in
                         "instance \(index)"

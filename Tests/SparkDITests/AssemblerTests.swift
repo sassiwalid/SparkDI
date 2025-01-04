@@ -10,11 +10,11 @@ import XCTest
 
 #if canImport(Testing)
 struct AssemblerTests {
-    @Test func assemblerWithMultipleModules() async {
+    @Test func assemblerWithMultipleModules() async throws {
         /// GIVEN
         let container = DependencyContainer()
         let assembler = Assembler(container: container)
-        await assembler.apply(
+        try await assembler.apply(
             modules: [NetworkModule(), UserModule()]
         )
 
@@ -43,10 +43,10 @@ struct AssemblerTests {
 
 final class AssemblerXCTests: XCTestCase {
     
-    func testAssemblerWithMultipleModules() async {
+    func testAssemblerWithMultipleModules() async throws {
         let container = DependencyContainer()
         let assembler = Assembler(container: container)
-        await assembler.apply(
+        try await assembler.apply(
             modules: [NetworkModule(), UserModule()]
         )
         
