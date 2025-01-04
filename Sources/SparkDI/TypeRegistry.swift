@@ -4,11 +4,11 @@
 
 import Foundation
 
-struct TypeRegistry {
+actor TypeRegistry {
 
-    static var shared = TypeRegistry()
+    static nonisolated let shared = TypeRegistry()
 
-    private var typeMap: [String: Any.Type] = [
+    private static var safeTypeMap: [String: Any.Type] = [
         "Int": Int.self,
         "String": String.self,
         "Double": Double.self,
@@ -16,14 +16,16 @@ struct TypeRegistry {
         "Date": Date.self,
         "Float": Float.self
     ]
+    
+    private var typeMap: [String: Any.Type] = safeTypeMap
 
-    mutating func register(type: Any.Type) {
+    func register(type: Any.Type) {
         let typeName = String(describing: type)
 
         typeMap[typeName] = type
     }
     
-    func type(from name: String) -> Any.Type? {
-        typeMap[name]
+    nonisolated func type(from name: String) -> Any.Type? {
+        Self.safeTypeMap[name]
     }
 }
