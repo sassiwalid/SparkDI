@@ -5,5 +5,7 @@
 enum DependencyError: Error, Equatable {
 
     case unresolvedDependency(type: String)
+    
+    case circularDependency
 
 }
