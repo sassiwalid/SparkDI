@@ -35,6 +35,7 @@ public actor DependencyContainer {
     public func register<T>(
         type: T.Type,
         factory: @escaping ([Any]) -> T,
+        argumentsTypes: [Any.Type] = [],
         scope: Scope = .transient
     ) async throws {
         
@@ -42,22 +43,18 @@ public actor DependencyContainer {
         
         let key = ObjectIdentifier(type)
         
-        let mirror = DependencyMirror(reflecting: factory)
-        
-        let dependencyTypes = mirror.argumentTypes
-        
-        for dependencyType in dependencyTypes {
+        for dependencyType in argumentsTypes {
             await TypeRegistry.shared.register(type: dependencyType)
             
         }
-        
-        let dependencyIds = Set(dependencyTypes.map { ObjectIdentifier($0) })
+
+        let dependencyIds = Set(argumentsTypes.map { ObjectIdentifier($0) })
         
         
         dependencies[key] = Dependency(
             factory: factory,
             scope: scope,
-            dependencyTypes: dependencyTypes
+            dependencyTypes: argumentsTypes
         )
         
         dependencyGraph[key] = dependencyIds

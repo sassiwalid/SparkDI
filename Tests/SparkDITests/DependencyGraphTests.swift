@@ -8,47 +8,66 @@ import Testing
 import XCTest
 @testable import SparkDI
 
+class ServiceA{
+    let serviceB: ServiceB
+    init(serviceB: ServiceB) {
+        self.serviceB = serviceB
+    }
+}
+class ServiceB {
+    let serviceA: ServiceA
+    init(serviceA: ServiceA) {
+        self.serviceA = serviceA
+    }
+}
+
 #if canImport(Testing)
+
 struct DependencyGraphTests {
-    class ServiceA{
-        let serviceB: ServiceB
-        init(serviceB: ServiceB) {
-            self.serviceB = serviceB
-        }
-    }
-    class ServiceB {
-        let serviceA: ServiceA
-        init(serviceA: ServiceA) {
-            self.serviceA = serviceA
-        }
-    }
     
     @Test func circularDependency() async throws {
         let dependencyContainer = DependencyContainer()
-        
-        try await dependencyContainer.register(
-            type: ServiceA.self,
-            factory: { args in
-                guard let serviceB = args.first as? ServiceB else { fatalError("Invalid arguments") }
-                
-                return ServiceA(serviceB: serviceB)
-            },
-            scope: .transient
-        )
-        
-        try await dependencyContainer.register(
-            type: ServiceB.self,
-            factory: { args in
-                guard let serviceA = args.first as? ServiceA else { fatalError("Invalid arguments") }
-                
-                return ServiceB(serviceA: serviceA)
-            },
-            scope: .transient
-        )
-        
-        let serviceA = await dependencyContainer.resolve(type: ServiceA.self)
-        
-        #expect(serviceA == nil)
+        do {
+            try await dependencyContainer.register(
+                type: ServiceA.self,
+                factory: { args in
+                    guard let serviceB = args.first as? ServiceB else { fatalError("Invalid arguments") }
+                    
+                    return ServiceA(serviceB: serviceB)
+                },
+                argumentsTypes: [ServiceB.self],
+                scope: .transient
+            )
+            
+            try await dependencyContainer.register(
+                type: ServiceB.self,
+                factory: { args in
+                    guard let serviceA = args.first as? ServiceA else { fatalError("Invalid arguments") }
+                    
+                    return ServiceB(serviceA: serviceA)
+                },
+                argumentsTypes: [ServiceA.self],
+                scope: .transient
+            )
+
+            Issue.record("Should have thrown circular dependency error")
+
+        } catch let error as DependencyError {
+
+            switch error {
+
+            case .circularDependency:
+
+                break
+
+            default:
+
+                Issue.record("Wrong error type: expected circular dependency")
+            }
+        } catch {
+
+            Issue.record("Unexpected error: \(error)")
+        }
     }
 
 }
