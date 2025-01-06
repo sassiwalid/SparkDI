@@ -14,6 +14,8 @@ public enum Scope {
 public enum DependencyError: Error {
 
     case circularDependency
+    
+    case missingDependency
 }
 
 public actor DependencyContainer {
