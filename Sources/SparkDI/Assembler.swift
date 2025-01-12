@@ -25,7 +25,7 @@ public final class Assembler {
         arguments: Any...
     ) async -> T? {
 
-        await container.resolve(
+        try? await container.resolve(
             type: type,
             arguments: arguments
         )

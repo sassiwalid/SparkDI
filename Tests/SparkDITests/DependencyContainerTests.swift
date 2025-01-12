@@ -23,8 +23,8 @@ struct DependencyInjectionTests {
             scope: .singleton
         )
         /// When
-        let instance1: String? = await container.resolve(type: String.self)
-        let instance2: String? = await container.resolve(type: String.self)
+        let instance1: String? = try await container.resolve(type: String.self)
+        let instance2: String? = try await container.resolve(type: String.self)
         
         /// Then
         #expect(instance1 == instance2)
@@ -44,8 +44,8 @@ struct DependencyInjectionTests {
 
         /// When
 
-        let instance1: String? = await container.resolve(type: String.self)
-        let instance2: String? = await container.resolve(type: String.self)
+        let instance1: String? = try await container.resolve(type: String.self)
+        let instance2: String? = try await container.resolve(type: String.self)
         
         /// Then
         #expect(instance1 != instance2)
@@ -68,12 +68,12 @@ struct DependencyInjectionTests {
 
         /// When
 
-        let instance1: AppConfigurationDummy? = await container.resolve(
+        let instance1: AppConfigurationDummy? = try await container.resolve(
             type: AppConfigurationDummy.self,
             arguments: "1.0.0"
         )
         
-        let instance2: AppConfigurationDummy? = await container.resolve(type: AppConfigurationDummy.self)
+        let instance2: AppConfigurationDummy? = try await container.resolve(type: AppConfigurationDummy.self)
         
         /// Then
         #expect(instance1 == instance2)
@@ -96,12 +96,12 @@ struct DependencyInjectionTests {
 
         /// When
 
-        let instance1: AppConfigurationDummy? = await container.resolve(
+        let instance1: AppConfigurationDummy? = try await container.resolve(
             type: AppConfigurationDummy.self,
             arguments: "1.0.0"
         )
         
-        let instance2: AppConfigurationDummy? = await container.resolve(
+        let instance2: AppConfigurationDummy? = try await container.resolve(
             type: AppConfigurationDummy.self,
             arguments: "2.0.0"
         )
@@ -128,7 +128,7 @@ struct DependencyInjectionTests {
 
         /// When
         
-        let instance: String? = await container.resolve(
+        let instance: String? = try await container.resolve(
             type: String.self,
             arguments: ["John", 25]
         )
@@ -151,8 +151,8 @@ final class DependencyContainerTests: XCTestCase {
         try await container.register(type: String.self, factory: { _ in  "Singleton Instance" }, scope: .singleton)
 
         // Then
-        let instance1: String? = await container.resolve(type: String.self)
-        let instance2: String? = await container.resolve(type: String.self)
+        let instance1: String? = try await container.resolve(type: String.self)
+        let instance2: String? = try await container.resolve(type: String.self)
 
         XCTAssertTrue(
             instance1 == instance2,
@@ -174,8 +174,8 @@ final class DependencyContainerTests: XCTestCase {
         
         /// When
 
-        let instance1: String? = await container.resolve(type: String.self)
-        let instance2: String? = await container.resolve(type: String.self)
+        let instance1: String? = try await container.resolve(type: String.self)
+        let instance2: String? = try await container.resolve(type: String.self)
 
         /// Then
 
@@ -203,12 +203,12 @@ final class DependencyContainerTests: XCTestCase {
 
         /// When
 
-        let instance1: AppConfigurationDummy? = await container.resolve(
+        let instance1: AppConfigurationDummy? = try await container.resolve(
             type: AppConfigurationDummy.self,
             arguments: "1.0.0"
         )
         
-        let instance2: AppConfigurationDummy? = await container.resolve(type: AppConfigurationDummy.self)
+        let instance2: AppConfigurationDummy? = try await container.resolve(type: AppConfigurationDummy.self)
         
         /// Then
         XCTAssertTrue(
@@ -235,12 +235,12 @@ final class DependencyContainerTests: XCTestCase {
 
         /// When
 
-        let instance1: AppConfigurationDummy? = await container.resolve(
+        let instance1: AppConfigurationDummy? = try await container.resolve(
             type: AppConfigurationDummy.self,
             arguments: "1.0.0"
         )
         
-        let instance2: AppConfigurationDummy? = await container.resolve(
+        let instance2: AppConfigurationDummy? = try await container.resolve(
             type: AppConfigurationDummy.self,
             arguments: "2.0.0"
         )
@@ -272,7 +272,7 @@ final class DependencyContainerTests: XCTestCase {
 
         /// When
 
-        let instance: String? = await container.resolve(
+        let instance: String? = try await container.resolve(
             type: String.self,
             arguments: ["John", 25]
         )

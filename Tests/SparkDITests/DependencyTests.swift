@@ -14,7 +14,7 @@ struct SparkDIInjectedTests {
 
         var newInt: Dependency<Int> = Dependency<Int>(assembler)
         
-        await newInt.resolve()
+        try await newInt.resolve()
         
         #expect(newInt.wrappedValue == 1)
     }
@@ -63,7 +63,7 @@ final class InjectedTests: XCTestCase {
 
         var newInt: Dependency<Int> = Dependency<Int>(assembler)
 
-        await newInt.resolve()
+        try await newInt.resolve()
 
         XCTAssertEqual(newInt.wrappedValue, 1)
     }

@@ -7,8 +7,8 @@ struct Dependency<T> {
 
     let assembler: Assembler
     
-    mutating func resolve() async {
-        instance = await assembler.container.resolve(type: T.self)
+    mutating func resolve() async throws  {
+        instance = try await assembler.container.resolve(type: T.self)
     }
 
     var wrappedValue: T {

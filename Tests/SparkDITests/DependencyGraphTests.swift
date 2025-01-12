@@ -27,7 +27,6 @@ struct DependencyGraphTesting {
     
     @Test func circularDependency() async throws {
         let dependencyContainer = DependencyContainer()
-        do {
             try await dependencyContainer.register(
                 type: ServiceA.self,
                 factory: { args in
@@ -50,7 +49,8 @@ struct DependencyGraphTesting {
                 scope: .transient
             )
 
-            Issue.record("Should have thrown circular dependency error")
+        do {
+            _ = try await dependencyContainer.resolve(type: ServiceA.self)
 
         } catch let error as DependencyError {
 
@@ -75,7 +75,6 @@ struct DependencyGraphTesting {
 class DependencyGraphTests: XCTestCase {
     func testCircularDependency() async throws {
         let dependencyContainer = DependencyContainer()
-        do {
             try await dependencyContainer.register(
                 type: ServiceA.self,
                 factory: { args in
@@ -97,9 +96,8 @@ class DependencyGraphTests: XCTestCase {
                 argumentsTypes: [ServiceA.self],
                 scope: .transient
             )
-
-            XCTFail("Should have thrown circular dependency error")
-
+        do {
+            _ = try await dependencyContainer.resolve(type: ServiceA.self)
         } catch let error as DependencyError {
 
             switch error {

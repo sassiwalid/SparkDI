@@ -21,16 +21,16 @@ struct AssemblerTests {
         /// WHEN
 
         // resolve Network module dependencies (singletons case)
-        let apiService1 = await container.resolve(type: APIServiceDummy.self)
-        let apiService2 = await container.resolve(type: APIServiceDummy.self)
+        let apiService1 = try await container.resolve(type: APIServiceDummy.self)
+        let apiService2 = try await container.resolve(type: APIServiceDummy.self)
         
-        let networkManager1 = await container.resolve(type: NetworkManagerDummy.self)
-        let networkManager2 = await container.resolve(type: NetworkManagerDummy.self)
+        let networkManager1 = try await container.resolve(type: NetworkManagerDummy.self)
+        let networkManager2 = try await container.resolve(type: NetworkManagerDummy.self)
         
         // resolve user module dependencies (new instance case)
         
-        let userService1 = await container.resolve(type: UserServiceDummy.self)
-        let userService2 = await container.resolve(type: UserServiceDummy.self)
+        let userService1 = try await container.resolve(type: UserServiceDummy.self)
+        let userService2 = try await container.resolve(type: UserServiceDummy.self)
 
         /// THEN
 
@@ -51,16 +51,16 @@ final class AssemblerXCTests: XCTestCase {
         )
         
         // resolve Network module dependencies (singletons case)
-        let apiService1 = await container.resolve(type: APIServiceDummy.self)
-        let apiService2 = await container.resolve(type: APIServiceDummy.self)
+        let apiService1 = try await container.resolve(type: APIServiceDummy.self)
+        let apiService2 = try await container.resolve(type: APIServiceDummy.self)
         
-        let networkManager1 = await container.resolve(type: NetworkManagerDummy.self)
-        let networkManager2 = await container.resolve(type: NetworkManagerDummy.self)
+        let networkManager1 = try await container.resolve(type: NetworkManagerDummy.self)
+        let networkManager2 = try await container.resolve(type: NetworkManagerDummy.self)
         
         // resolve user module dependencies (new instance case)
         
-        let userService1 = await container.resolve(type: UserServiceDummy.self)
-        let userService2 = await container.resolve(type: UserServiceDummy.self)
+        let userService1 = try await container.resolve(type: UserServiceDummy.self)
+        let userService2 = try await container.resolve(type: UserServiceDummy.self)
         
         XCTAssertTrue(apiService1 === apiService2)
         XCTAssertTrue(networkManager1 === networkManager2)

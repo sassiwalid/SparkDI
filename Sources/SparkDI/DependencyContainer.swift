@@ -53,18 +53,20 @@ public actor DependencyContainer {
         )
         
         dependencyGraph[key] = dependencyIds
-        
-        try detectCircularDependencies(for: type)
     }
  
     public func resolve<T>(
         type: T.Type,
         arguments: Any...
-    ) -> T? {
+    ) async throws -> T {
     
         let key = ObjectIdentifier(type)
-
-        guard let dependency = dependencies[key] else { return nil }
+        
+        guard let dependency = dependencies[key] else {
+            throw DependencyError.dependencyNotFound(type: type)
+        }
+        
+        try detectCircularDependencies(for: type)
 
         switch dependency.scope {
 
@@ -74,15 +76,21 @@ public actor DependencyContainer {
                 return sharedInstance
             }
 
-            let sharedInstance = dependency.factory(arguments) as? T
+            guard let sharedInstance = dependency.factory(arguments) as? T else {
+                throw DependencyError.resolutionFailed(type: type)
+            }
 
             sharedInstances[key] = sharedInstance
 
             return sharedInstance
 
         case .transient:
+            
+            guard let instance = dependency.factory(arguments) as? T else {
+                throw DependencyError.resolutionFailed(type: type)
+            }
 
-            return dependency.factory(arguments) as? T
+            return instance
         }
 
     }
