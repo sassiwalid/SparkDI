@@ -8,8 +8,6 @@ import Testing
 import XCTest
 @testable import SparkDI
 
-#if canImport(Testing)
-
 fileprivate class ServiceA {
     let serviceB: ServiceB
 
@@ -25,6 +23,8 @@ fileprivate class ServiceB {
         self.serviceA = serviceA
     }
 }
+
+#if canImport(Testing)
 
 struct DependencyGraphTesting {
     
