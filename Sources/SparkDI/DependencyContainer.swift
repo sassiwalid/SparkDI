@@ -148,8 +148,10 @@ public actor DependencyContainer {
 
             if let dependenciesId = dependencyGraph[currentId] {
                 for dependencyId in dependenciesId {
-                    if let dependencyType = dependencies[dependencyId]?.dependencyTypes.first {
-                        try depthFirstSearch(dependencyType)
+                    if let dependencyTypes = dependencies[dependencyId]?.dependencyTypes {
+                        for depType in dependencyTypes {
+                            try depthFirstSearch(depType)
+                        }
                     }
                 }
             }
