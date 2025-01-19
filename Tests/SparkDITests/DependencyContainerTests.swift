@@ -142,29 +142,29 @@ struct DependencyInjectionTests {
 #endif
 
 final class DependencyContainerTests: XCTestCase {
-
+    
     func testSingletonScopeWithoutParameter() async throws {
         /// Given
         let container = DependencyContainer()
-
+        
         /// When
         try await container.register(type: String.self, factory: { _ in  "Singleton Instance" }, scope: .singleton)
-
+        
         // Then
         let instance1: String? = try await container.resolve(type: String.self)
         let instance2: String? = try await container.resolve(type: String.self)
-
+        
         XCTAssertTrue(
             instance1 == instance2,
             "Singleton scope should return the same instance"
         )
-
+        
     }
     
     func testTransientScopeWithoutParameter() async throws {
         /// Given
         let container = DependencyContainer()
-
+        
         try await container.register(
             type: String.self,
             factory: { _ in UUID().uuidString
@@ -173,12 +173,12 @@ final class DependencyContainerTests: XCTestCase {
         )
         
         /// When
-
+        
         let instance1: String? = try await container.resolve(type: String.self)
         let instance2: String? = try await container.resolve(type: String.self)
-
+        
         /// Then
-
+        
         XCTAssertNotEqual(
             instance1,
             instance2,
@@ -190,7 +190,7 @@ final class DependencyContainerTests: XCTestCase {
         
         /// Given
         let container = DependencyContainer()
-
+        
         try await container.register(
             type: AppConfigurationDummy.self,
             factory: { args in
@@ -200,9 +200,9 @@ final class DependencyContainerTests: XCTestCase {
             },
             scope: .singleton
         )
-
+        
         /// When
-
+        
         let instance1: AppConfigurationDummy? = try await container.resolve(
             type: AppConfigurationDummy.self,
             arguments: "1.0.0"
@@ -215,14 +215,14 @@ final class DependencyContainerTests: XCTestCase {
             instance1 == instance2,
             "Singleton scope should return the same instance"
         )
-
+        
     }
-
+    
     func testTransientScopeWithSingleparameter() async throws {
         
         /// Given
         let container = DependencyContainer()
-
+        
         try await container.register(
             type: AppConfigurationDummy.self,
             factory: { args in
@@ -232,9 +232,9 @@ final class DependencyContainerTests: XCTestCase {
             },
             scope: .transient
         )
-
+        
         /// When
-
+        
         let instance1: AppConfigurationDummy? = try await container.resolve(
             type: AppConfigurationDummy.self,
             arguments: "1.0.0"
@@ -258,7 +258,7 @@ final class DependencyContainerTests: XCTestCase {
     func testTransientScopeWithMultipleParameters() async throws {
         /// Given
         let container = DependencyContainer()
-
+        
         try await container.register(
             type: String.self,
             factory: { args in
@@ -269,19 +269,22 @@ final class DependencyContainerTests: XCTestCase {
             },
             scope: .transient
         )
-
+        
         /// When
-
+        
         let instance: String? = try await container.resolve(
             type: String.self,
             arguments: ["John", 25]
         )
-
+        
         /// Then
-
+        
         XCTAssertEqual(
             instance,
             "John is 25 years old"
         )
     }
+    
 }
+
+

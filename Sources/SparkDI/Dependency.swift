@@ -6,7 +6,7 @@ struct Dependency<T> {
     var instance: T?
 
     let assembler: Assembler
-    
+
     mutating func resolve() async throws  {
         instance = try await assembler.container.resolve(type: T.self)
     }

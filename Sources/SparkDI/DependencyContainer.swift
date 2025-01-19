@@ -3,6 +3,10 @@
 //
 import Foundation
 
+protocol Injectable {
+    func resolveDependencies() async throws
+}
+
 public enum Scope {
 
     case singleton
@@ -24,6 +28,8 @@ public actor DependencyContainer {
     private var sharedInstances: [ObjectIdentifier: Any] = [:]
     
     private var dependencyGraph: [ObjectIdentifier: Set<ObjectIdentifier>] = [:]
+    
+    private var resolvedInstances: Set<ObjectIdentifier> = []
 
     public init() {}
 
@@ -54,8 +60,31 @@ public actor DependencyContainer {
         
         dependencyGraph[key] = dependencyIds
     }
- 
+    
     public func resolve<T>(
+        type: T.Type,
+        arguments: Any...
+    ) async throws -> T {
+        let key = ObjectIdentifier(type)
+        
+        guard !resolvedInstances.contains(key) else {
+            return try await resolveSingle(type: type,arguments: arguments)
+        }
+        
+        resolvedInstances.insert(key)
+        
+        defer { resolvedInstances.remove(key) }
+        
+        let instance = try await resolveSingle(type: type,arguments: arguments)
+        
+        if let injectableInstance = instance as? Injectable {
+            try await injectableInstance.resolveDependencies()
+        }
+        
+        return instance
+    }
+ 
+    public func resolveSingle<T>(
         type: T.Type,
         arguments: Any...
     ) async throws -> T {
