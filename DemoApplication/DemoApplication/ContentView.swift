@@ -6,19 +6,10 @@
 import SwiftUI
 import SparkDI
 
-struct DemoAppDependencies {
-    static let container: DependencyContainer = {
-        let container = DependencyContainer()
-        container.register(type: String.self) { _ in
-            return "hello SparkDI"
-        }
-        return container
-    }()
-}
-
 struct ContentView: View {
+    
+    @State private var message: String = ""
     var body: some View {
-        let message: String = DemoAppDependencies.container.resolve(type: String.self)!
         VStack {
             Image(systemName: "globe")
                 .imageScale(.large)
@@ -26,6 +17,17 @@ struct ContentView: View {
             Text(message)
         }
         .padding()
+        .task {
+            do {
+                try await AppAssembler.initialize()
+
+                message = try await AppAssembler.container.resolve(type: String.self)
+                
+            } catch {
+                message = "Error: \(error)"
+            }
+        }
+       
     }
 }
 
