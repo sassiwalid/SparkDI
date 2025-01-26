@@ -4,12 +4,15 @@ SparkDI is a dependency injection framework in Swift, designed for speed and per
 
 ## Features
 
-    •    Constructor, Property, and Method Dependency Injection
-    •    Scope Management: Singleton and Transient
-    •    Property Wrapper Support: Use @Dependency for cleaner, safer dependency injection
-    •    Actor-Based Thread Safety: Modern Swift Concurrency for managing concurrent access
-    •    Modular Dependency Registration: Organize and manage dependencies with an Assembler and modules
-    •    Support for Dependencies with Multiple Arguments
+- Constructor, Property, and Method Dependency Injection
+- Scope Management: Singleton and Transient
+- Property Wrapper Support: Use @Dependency for cleaner, safer dependency injection
+- Actor-Based Thread Safety: Modern Swift Concurrency for managing concurrent access
+- Modular Dependency Registration: Organize and manage dependencies with an Assembler and modules
+- Support for Dependencies with Multiple Arguments
+- Circular Dependency Detection: Automatically detects and prevents circular dependencies
+- Type Registry: Enhanced type safety and dependency tracking
+- Improved Error Handling: Clear error messages for common dependency injection issues
 
 ## Installation
 
@@ -35,10 +38,10 @@ To register a dependency, use the register method. You can specify the type, a f
 ```swift
 
 // Registering a singleton instance
-await container.register(type: String.self, instance: { "Singleton Instance" }, scope: .singleton)
+try await container.register(type: String.self, instance: { "Singleton Instance" }, scope: .singleton)
 
 // Registering a transient instance
-await container.register(type: Int.self, instance: { 42 }, scope: .transient)
+try await container.register(type: Int.self, instance: { 42 }, scope: .transient)
 
 ```
     •    .singleton scope creates the instance once and reuses it for every resolution.
@@ -51,11 +54,11 @@ To get an instance of a dependency, use the resolve method:
 ```swift
 
 // Resolving the singleton instance
-let singletonString: String? = await container.resolve(type: String.self)
+let singletonString: String? = try await container.resolve(type: String.self)
 print(singletonString) // Output: Singleton Instance
 
 // Resolving the transient instance
-let transientInt: Int? = await container.resolve(type: Int.self)
+let transientInt: Int? = try await container.resolve(type: Int.self)
 print(transientInt) // Output: 42
 
 ```
@@ -69,7 +72,7 @@ You can register a dependency that requires multiple arguments by using a factor
 
 ```swift
 
-await container.register(
+try await container.register(
    type: String.self,
    factory: { args in
 
@@ -90,7 +93,7 @@ When resolving a dependency that requires arguments, pass the arguments in the r
 
 ```swift
 
-let instance: String? = await container.resolve(
+let instance: String? = try await container.resolve(
     type: String.self,
     arguments: ["Mohamed", 40]
 )
@@ -112,13 +115,13 @@ struct NetworkModule: Module {
 
  func registerDependencies(in container: DependencyContainer) {
 
-    await container.register(
+    try await container.register(
     type: APIService.self,
     instance: { APIService() },
     scope: .singleton
     )
 
-    await container.register(
+    try await container.register(
     type: NetworkManager.self,
     instance: { NetworkManager() },
     scope: .transient
@@ -131,13 +134,13 @@ struct NetworkModule: Module {
 struct UserModule: Module {
   func registerDependencies(in container: DependencyContainer) {
     
-    await container.register(
+    try await container.register(
         type: UserService.self,
         instance: { UserService() },
         scope: .singleton
     )
 
-    await container.register(
+    try await container.register(
         type: UserSession.self,
         instance: { UserSession() }, 
         scope: .transient
@@ -174,7 +177,7 @@ class ViewController {
     @Dependency(assembler) var service: SomeService
 
     func load() async {
-        await $service.resolve() // Asynchronously resolve the dependency
+        try await $service.resolve() // Asynchronously resolve the dependency
         service.performAction()
     }
 }
@@ -186,7 +189,7 @@ let container = DependencyContainer()
 let assembler = Assembler(container: container)
 
 Task {
-    await container.register(SomeService.self) { SomeService() }
+    try await container.register(SomeService.self) { SomeService() }
 
     let viewController = ViewController()
     await viewController.load() // Output: Service is performing an action!
@@ -208,7 +211,22 @@ Why Use Actors?
     •    Automatic Synchronization: Actors serialize access to their state, ensuring thread safety without requiring manual locks.
     •    Modern Concurrency: Aligns with Swift’s concurrency model (async/await) for safer, more scalable multithreading.
     •    Performance: Actors reduce the risk of deadlocks and race conditions, improving stability under heavy concurrent access.
+    
+## Circular Dependency Detection
 
+SparkDI automatically detects circular dependencies during resolution:
+
+```swift
+// This will throw a circular dependency error
+class ServiceA {
+    @Dependency var serviceB: ServiceB
+}
+
+class ServiceB {
+    @Dependency var serviceA: ServiceA
+}
+```
+The framework uses a depth-first search algorithm (DFS) to detect cycles in the dependency graph, preventing infinite loops and initialization deadlocks.
 
 ## Future Improvements
 
