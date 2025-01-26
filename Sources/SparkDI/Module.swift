@@ -4,6 +4,6 @@
 
 public protocol Module {
 
-    func registerDependencies(in container: SparkDI.DependencyContainer) async
+    func registerDependencies(in container: SparkDI.DependencyContainer) async throws
 
 }

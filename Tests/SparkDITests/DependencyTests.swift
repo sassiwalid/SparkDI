@@ -6,15 +6,15 @@ import XCTest
 
 #if canImport(Testing)
 struct SparkDIInjectedTests {
-    @Test func wrappedValueReturnResolvedInstance() async {
+    @Test func wrappedValueReturnResolvedInstance() async throws {
         let container = DependencyContainer()
         let assembler = Assembler(container: container)
         
-        await container.register(type: Int.self) { _ in 1 }
+        try await container.register(type: Int.self) { _ in 1 }
 
         var newInt: Dependency<Int> = Dependency<Int>(assembler)
         
-        await newInt.resolve()
+        try await newInt.resolve()
         
         #expect(newInt.wrappedValue == 1)
     }
@@ -53,17 +53,17 @@ struct SparkDIInjectedTests {
 
 final class InjectedTests: XCTestCase {
 
-    func testwrappedValueReturnResolvedInstance() async {
+    func testwrappedValueReturnResolvedInstance() async throws {
 
         let container = DependencyContainer()
 
         let assembler = Assembler(container: container)
 
-        await container.register(type: Int.self) { _ in 1 }
+        try await container.register(type: Int.self) { _ in 1 }
 
         var newInt: Dependency<Int> = Dependency<Int>(assembler)
 
-        await newInt.resolve()
+        try await newInt.resolve()
 
         XCTAssertEqual(newInt.wrappedValue, 1)
     }
