@@ -26,9 +26,9 @@ public actor DependencyContainer {
     private var dependencies: [ObjectIdentifier: Dependency] = [:]
 
     private var sharedInstances: [ObjectIdentifier: Any] = [:]
-    
+
     private var dependencyGraph: [ObjectIdentifier: Set<ObjectIdentifier>] = [:]
-    
+
     private var resolvedInstances: Set<ObjectIdentifier> = []
 
     public init() {}
@@ -39,62 +39,63 @@ public actor DependencyContainer {
         argumentsTypes: [Any.Type] = [],
         scope: Scope = .transient
     ) async throws {
-        
-        await TypeRegistry.shared.register(type: T.self)
-        
+
         let key = ObjectIdentifier(type)
-        
-        for dependencyType in argumentsTypes {
-            await TypeRegistry.shared.register(type: dependencyType)
-            
-        }
 
         let dependencyIds = Set(argumentsTypes.map { ObjectIdentifier($0) })
-        
-        
+
         dependencies[key] = Dependency(
             factory: factory,
             scope: scope,
             dependencyTypes: argumentsTypes
         )
-        
+
         dependencyGraph[key] = dependencyIds
+
     }
-    
+
     public func resolve<T>(
         type: T.Type,
         arguments: Any...
     ) async throws -> T {
+
         let key = ObjectIdentifier(type)
-        
+
         guard !resolvedInstances.contains(key) else {
-            return try await resolveSingle(type: type,arguments: arguments)
+            return try await createInstance(
+                type: type,
+                arguments: arguments
+            )
         }
-        
+
         resolvedInstances.insert(key)
-        
+
         defer { resolvedInstances.remove(key) }
-        
-        let instance = try await resolveSingle(type: type,arguments: arguments)
-        
+
+        let instance = try await createInstance(
+            type: type,
+            arguments: arguments
+        )
+
         if let injectableInstance = instance as? Injectable {
             try await injectableInstance.resolveDependencies()
         }
-        
+
         return instance
+
     }
  
-    public func resolveSingle<T>(
+    private func createInstance<T>(
         type: T.Type,
         arguments: Any...
     ) async throws -> T {
-    
+
         let key = ObjectIdentifier(type)
-        
+
         guard let dependency = dependencies[key] else {
             throw DependencyError.dependencyNotFound(type: type)
         }
-        
+
         try detectCircularDependencies(for: type)
 
         switch dependency.scope {
@@ -114,7 +115,7 @@ public actor DependencyContainer {
             return sharedInstance
 
         case .transient:
-            
+
             guard let instance = dependency.factory(arguments) as? T else {
                 throw DependencyError.resolutionFailed(type: type)
             }
