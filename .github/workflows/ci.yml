@@ -17,20 +17,12 @@ jobs:
       - name: Select Xcode 16
         run: sudo xcode-select -s /Applications/Xcode_16.2.0.app/Contents/Developer
         
-      - name: Check Xcode Version
+      - name: Show Xcode and Swift Version
         run: xcodebuild -version
-        
-      - name: Check Swift Version
-        run: swift --version
+             swift --version
         
       - name: Build SparkDI
-        run: swift build
-        
-      - name: Run Swift Testing Tests
-        run: swift test --enable-swift-testing
+        run: swift build --build-tests
                 
-      - name: Generate Test Report
-        if: always()
-        run: |
-          swift test --enable-swift-testing --parallel || true
-          echo "Test execution completed"
+      - name: Run Swift Testing Tests
+        run: swift test --enable-code-coverage --parallel
