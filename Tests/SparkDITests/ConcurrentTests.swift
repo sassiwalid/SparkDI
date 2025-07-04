@@ -2,13 +2,11 @@
 //  Copyright © 2024 SparkDI Contributors. All rights reserved.
 //
 
-#if canImport(Testing)
 import Testing
-#endif
-import XCTest
+import Foundation
+
 @testable import SparkDI
 
-#if canImport(Testing)
 struct SparkDIConcurrentTests {
     @Test
     func ConcurrentWriteCrash() async throws {
@@ -51,51 +49,5 @@ struct SparkDIConcurrentTests {
 
             expectation()
         }
-    }
-}
-#endif
-
-final class ConcurrentTests: XCTestCase {
-    func testConcurrentWriteCrash() throws {
-        let container = DependencyContainer()
-        
-        let expectation = XCTestExpectation(description: "Concurrent writes should cause crash (1000 iterations)")
-        
-        let iterations = 1000
-
-        DispatchQueue.concurrentPerform(iterations: iterations) { index in
-            Task {
-                try await container.register(
-                    type: String.self,
-                    factory: { _ in
-                        "instance \(index)"
-                    },
-                    scope: .transient
-                )
-            }
-        }
-        
-        expectation.fulfill()
-        
-        wait(for: [expectation], timeout: 5)
-    }
-    
-    func testConcurrentReadCrash() throws {
-        let container = DependencyContainer()
-        
-        let expectation = XCTestExpectation(description: "Concurrent read should cause crash (1000 iterations)")
-        
-        let iterations = 1000
-
-        DispatchQueue.concurrentPerform(iterations: iterations) { index in
-            Task {
-                _ = try await container.resolve(type: String.self)
-    
-            }
-        }
-        
-        expectation.fulfill()
-        
-        wait(for: [expectation], timeout: 5)
     }
 }
