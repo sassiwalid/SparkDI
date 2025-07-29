@@ -1,5 +1,7 @@
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/sassiwalid/SparkDI)![Swift](https://img.shields.io/badge/Swift-5.9-success.svg)
-![Platforms](https://img.shields.io/badge/Platforms-iOS%2015.0+%20|%20macOS%2012.0+-success.svg)
+[![Swift 6.0](https://img.shields.io/badge/Swift-6.0-orange.svg)](https://swift.org)
+[![Platforms](https://img.shields.io/badge/Platforms-iOS%2017%2B%20|%20macOS%2014%2B-lightgrey.svg)](https://developer.apple.com)
+[![Swift Testing](https://img.shields.io/badge/Testing-Swift%20Testing-blue.svg)](https://github.com/apple/swift-testing)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 # SparkDI
 
