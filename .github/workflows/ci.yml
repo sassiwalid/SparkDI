@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14  # Use macOS 14 for Xcode 16 support
+    runs-on: macos-15  # Use macOS 15 for Xcode 16 support
     steps:
       - name: Checkout code
         uses: actions/checkout@v4  # Updated to v4
