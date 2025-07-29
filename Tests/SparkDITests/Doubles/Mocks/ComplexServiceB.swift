@@ -4,7 +4,7 @@
 
 @testable import SparkDI
 
-class ComplexServiceB: Injectable {
+final class ComplexServiceB: Injectable, @unchecked Sendable {
     @Dependency var serviceC: ServiceC
 
     @Dependency var serviceD: ServiceD
@@ -15,10 +15,10 @@ class ComplexServiceB: Injectable {
         _serviceD = Dependency(assembler)
     }
     
-    func resolveDependencies() async throws {
-        try await _serviceC.resolve()
+    func resolveDependencies() throws {
+        try _serviceC.resolve()
         
-        try await _serviceD.resolve()
+        try _serviceD.resolve()
     }
     
 }

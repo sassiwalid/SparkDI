@@ -6,13 +6,13 @@
 struct NetworkModule: Module {
 
     func registerDependencies(in container: SparkDI.DependencyContainer) async throws {
-        try await container.register(
+        try container.register(
             type: APIServiceDummy.self,
             factory: { _ in  APIServiceDummy()
             },
             scope: .singleton)
         
-        try await container.register(
+        try container.register(
             type: NetworkManagerDummy.self,
             factory: { _ in  NetworkManagerDummy()
             },

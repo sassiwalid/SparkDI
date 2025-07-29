@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class Assembler {
+public final class Assembler: @unchecked Sendable {
 
     let container: DependencyContainer
 

@@ -7,7 +7,7 @@ struct Dependency<T:Sendable> {
 
     let assembler: Assembler
 
-    mutating func resolve() async throws  {
+    mutating func resolve() throws  {
         instance = try assembler.container.resolve(type: T.self)
     }
 
