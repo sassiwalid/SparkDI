@@ -2,7 +2,7 @@
 //  Copyright © 2024 SparkDI Contributors. All rights reserved.
 //
 
-enum DependencyError: Error, Equatable {
+enum DependencyError: Error, Equatable, Sendable {
 
     case dependencyNotFound(type: Any.Type)
 
