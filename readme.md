@@ -10,7 +10,7 @@ SparkDI is a dependency injection framework in Swift, designed for speed and per
 - Constructor, Property, and Method Dependency Injection
 - Scope Management: Singleton and Transient
 - Property Wrapper Support: Use @Dependency for cleaner, safer dependency injection
-- Actor-Based Thread Safety: Modern Swift Concurrency for managing concurrent access
+- New Synchronization Mutex APIThread Safety: Modern  Synchronization APIfor managing concurrent access
 - Modular Dependency Registration: Organize and manage dependencies with an Assembler and modules
 - Support for Dependencies with Multiple Arguments
 - Circular Dependency Detection: Automatically detects and prevents circular dependencies
@@ -41,10 +41,10 @@ To register a dependency, use the register method. You can specify the type, a f
 ```swift
 
 // Registering a singleton instance
-try await container.register(type: String.self, instance: { "Singleton Instance" }, scope: .singleton)
+try container.register(type: String.self, instance: { "Singleton Instance" }, scope: .singleton)
 
 // Registering a transient instance
-try await container.register(type: Int.self, instance: { 42 }, scope: .transient)
+try container.register(type: Int.self, instance: { 42 }, scope: .transient)
 
 ```
     •    .singleton scope creates the instance once and reuses it for every resolution.
@@ -57,11 +57,11 @@ To get an instance of a dependency, use the resolve method:
 ```swift
 
 // Resolving the singleton instance
-let singletonString: String? = try await container.resolve(type: String.self)
+let singletonString: String? = try container.resolve(type: String.self)
 print(singletonString) // Output: Singleton Instance
 
 // Resolving the transient instance
-let transientInt: Int? = try await container.resolve(type: Int.self)
+let transientInt: Int? = try container.resolve(type: Int.self)
 print(transientInt) // Output: 42
 
 ```
@@ -75,7 +75,7 @@ You can register a dependency that requires multiple arguments by using a factor
 
 ```swift
 
-try await container.register(
+try container.register(
    type: String.self,
    factory: { args in
 
@@ -96,7 +96,7 @@ When resolving a dependency that requires arguments, pass the arguments in the r
 
 ```swift
 
-let instance: String? = try await container.resolve(
+let instance: String? = try container.resolve(
     type: String.self,
     arguments: ["Mohamed", 40]
 )
@@ -118,13 +118,13 @@ struct NetworkModule: Module {
 
  func registerDependencies(in container: DependencyContainer) {
 
-    try await container.register(
+    try container.register(
     type: APIService.self,
     instance: { APIService() },
     scope: .singleton
     )
 
-    try await container.register(
+    try container.register(
     type: NetworkManager.self,
     instance: { NetworkManager() },
     scope: .transient
@@ -137,13 +137,13 @@ struct NetworkModule: Module {
 struct UserModule: Module {
   func registerDependencies(in container: DependencyContainer) {
     
-    try await container.register(
+    try container.register(
         type: UserService.self,
         instance: { UserService() },
         scope: .singleton
     )
 
-    try await container.register(
+    try container.register(
         type: UserSession.self,
         instance: { UserSession() }, 
         scope: .transient
@@ -164,9 +164,9 @@ let assembler = Assembler()
 assembler.apply(modules: [NetworkModule(), UserModule()])
 
 // Resolving dependencies
-let apiService: APIService? = await assembler.resolve(type: APIService.self)
+let apiService: APIService? = assembler.resolve(type: APIService.self)
 
-let userService: UserService? = await assembler.resolve(type: UserService.self)
+let userService: UserService? = assembler.resolve(type: UserService.self)
 
 ```
 
@@ -180,7 +180,7 @@ class ViewController {
     @Dependency(assembler) var service: SomeService
 
     func load() async {
-        try await $service.resolve() // Asynchronously resolve the dependency
+        try $service.resolve() // Asynchronously resolve the dependency
         service.performAction()
     }
 }
@@ -192,10 +192,10 @@ let container = DependencyContainer()
 let assembler = Assembler(container: container)
 
 Task {
-    try await container.register(SomeService.self) { SomeService() }
+    try container.register(SomeService.self) { SomeService() }
 
     let viewController = ViewController()
-    await viewController.load() // Output: Service is performing an action!
+    viewController.load() // Output: Service is performing an action!
 }
 
 ```
@@ -206,15 +206,22 @@ Advantages of the @Dependency Property Wrapper and Actor-Based Thread Safety
     •    Concurrent Safety: Actors protect shared state, ensuring stability during heavy multithreading.
     •    Asynchronous Compatibility: Both @Dependency and actors work natively with Swift’s async/await.
 
-## Actor-Based Thread Safety
+## Mutex-Based Thread Safety
+SparkDI uses Swift's modern Synchronization API with Mutex instead of actors or manual locks to ensure thread safety.
+Why Use Mutex?
 
-SparkDI uses actors instead of NSLock or other manual synchronization mechanisms to ensure thread safety.
-Why Use Actors?
+    • Precise Control: Mutex provides fine-grained control over critical sections, allowing optimal performance for dependency injection scenarios
+    • Synchronous Operations: No need for async/await overhead in dependency resolution, making the API simpler and more performant
+    • Modern Swift: Leverages Swift's latest Synchronization framework (macOS 15+, iOS 18+) for optimal thread safety
+    • Predictable Performance: Eliminates actor re-entrancy issues and provides consistent, low-latency dependency resolution
 
-    •    Automatic Synchronization: Actors serialize access to their state, ensuring thread safety without requiring manual locks.
-    •    Modern Concurrency: Aligns with Swift’s concurrency model (async/await) for safer, more scalable multithreading.
-    •    Performance: Actors reduce the risk of deadlocks and race conditions, improving stability under heavy concurrent access.
-    
+### Key Benefits
+
+    • Zero Async Overhead: Dependency resolution is synchronous, avoiding the complexity of async contexts
+    • Thread-Safe by Design: All shared state is protected by Mutex with withLock operations
+    • Deadlock Prevention: Careful lock ordering and minimal critical sections prevent common concurrency issues
+    • High Performance: Optimized for the high-frequency operations typical in dependency injection frameworks 
+
 ## Circular Dependency Detection
 
 SparkDI automatically detects circular dependencies during resolution:
