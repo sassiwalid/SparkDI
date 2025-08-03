@@ -91,6 +91,7 @@ public final class DependencyContainer: @unchecked Sendable {
         let instance = try createInstance(type: type, arguments: arguments)
 
         if let injectableInstance = instance as? Injectable {
+
             try injectableInstance.resolveDependencies()
         }
 
@@ -98,57 +99,82 @@ public final class DependencyContainer: @unchecked Sendable {
 
     }
  
-    private func createInstance<T:Sendable>(
+    private func createInstance<T: Sendable>(
         type: T.Type,
         arguments: Any...
     ) throws -> T {
 
         let key = ObjectIdentifier(type)
 
-        let dependency = dependencies.withLock{ deps -> Dependency? in
+        let dependency = dependencies.withLock { deps -> Dependency? in
             return deps[key]
         }
 
-        guard let dependency = dependency else {
+        guard let dependency else {
             throw DependencyError.dependencyNotFound(type: type)
         }
 
         try detectCircularDependencies(for: type)
 
-        switch dependency.scope {
-
+        return switch dependency.scope {
         case .singleton:
-
-            let existingInstance = sharedInstances.withLock { instances -> T? in
-                return instances[key] as? T
-            }
-
-            if let existingInstance = existingInstance {
-                return existingInstance
-            }
-
-            guard let newInstance = dependency.factory(arguments) as? T else {
-                throw DependencyError.resolutionFailed(type: type)
-            }
-
-            return sharedInstances.withLock { instances -> T in
-                if let sharedInstance = instances[key] as? T {
-                    return sharedInstance
-                }
-
-                instances[key] = newInstance
-                return newInstance
-            }
+            try createSingletonInstance(
+                type: type,
+                key: key,
+                dependency: dependency,
+                arguments: arguments
+            )
 
         case .transient:
+            try createTransientInstance(
+                type: type,
+                dependency: dependency,
+                arguments: arguments
+            )
+        }
+    }
 
-            guard let instance = dependency.factory(arguments) as? T else {
-                throw DependencyError.resolutionFailed(type: type)
-            }
+    private func createSingletonInstance<T: Sendable>(
+        type: T.Type,
+        key: ObjectIdentifier,
+        dependency: Dependency,
+        arguments: [Any]
+    ) throws -> T {
 
-            return instance
+        let existingInstance = sharedInstances.withLock { instances -> T? in
+            return instances[key] as? T
         }
 
+        if let existingInstance {
+            return existingInstance
+        }
+
+        guard let newInstance = dependency.factory(arguments) as? T else {
+            throw DependencyError.resolutionFailed(type: type)
+        }
+
+        return sharedInstances.withLock { instances -> T in
+
+            if let sharedInstance = instances[key] as? T {
+                return sharedInstance
+            }
+
+            instances[key] = newInstance
+            return newInstance
+        }
+    }
+
+    private func createTransientInstance<T: Sendable>(
+        type: T.Type,
+        dependency: Dependency,
+        arguments: [Any]
+    ) throws -> T {
+
+        guard let instance = dependency.factory(arguments) as? T else {
+            throw DependencyError.resolutionFailed(type: type)
+        }
+
+        return instance
     }
 
     private func detectCircularDependencies(for type: Any.Type) throws {
