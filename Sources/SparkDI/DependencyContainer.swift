@@ -2,12 +2,13 @@
 //  Copyright © 2024 SparkDI Contributors. All rights reserved.
 //
 import Foundation
+import Synchronization
 
 protocol Injectable {
-    func resolveDependencies() async throws
+    func resolveDependencies() throws
 }
 
-public enum Scope {
+public enum Scope: Sendable {
 
     case singleton
 
@@ -15,114 +16,165 @@ public enum Scope {
 
 }
 
-public actor DependencyContainer {
+public final class DependencyContainer: @unchecked Sendable {
 
     private struct Dependency {
-        let factory: ([Any]) -> Any
+        let factory: @Sendable ([Any]) -> Any
         let scope: Scope
         let dependencyTypes: [Any.Type]
     }
 
-    private var dependencies: [ObjectIdentifier: Dependency] = [:]
+    private let dependencies = Mutex<[ObjectIdentifier: Dependency]>([:])
 
-    private var sharedInstances: [ObjectIdentifier: Any] = [:]
+    private let sharedInstances = Mutex<[ObjectIdentifier: Any]>([:])
 
-    private var dependencyGraph: [ObjectIdentifier: Set<ObjectIdentifier>] = [:]
+    private let dependencyGraph = Mutex<[ObjectIdentifier: Set<ObjectIdentifier>]>([:])
 
-    private var resolvedInstances: Set<ObjectIdentifier> = []
+    private let resolvedInstances = Mutex<Set<ObjectIdentifier>>([])
 
     public init() {}
 
     public func register<T>(
         type: T.Type,
-        factory: @escaping ([Any]) -> T,
+        factory: @escaping @Sendable ([Any]) -> T,
         argumentsTypes: [Any.Type] = [],
         scope: Scope = .transient
-    ) async throws {
+    ) throws {
 
         let key = ObjectIdentifier(type)
 
         let dependencyIds = Set(argumentsTypes.map { ObjectIdentifier($0) })
 
-        dependencies[key] = Dependency(
+        let dependency = Dependency(
             factory: factory,
             scope: scope,
             dependencyTypes: argumentsTypes
         )
 
-        dependencyGraph[key] = dependencyIds
+        dependencies.withLock { deps in
+            deps[key] = dependency
+        }
+
+        dependencyGraph.withLock { graph in
+            graph[key] = dependencyIds
+        }
 
     }
 
-    public func resolve<T>(
+    public func resolve<T:Sendable>(
         type: T.Type,
         arguments: Any...
-    ) async throws -> T {
+    ) throws -> T {
 
         let key = ObjectIdentifier(type)
 
-        guard !resolvedInstances.contains(key) else {
-            return try await createInstance(
-                type: type,
-                arguments: arguments
-            )
+        let shouldResolve = resolvedInstances.withLock { resolved in
+            if resolved.contains(key) {
+                return false
+            }
+
+            resolved.insert(key)
+
+            return true
         }
 
-        resolvedInstances.insert(key)
+        if !shouldResolve {
+            return try createInstance(type: type, arguments: arguments)
+        }
 
-        defer { resolvedInstances.remove(key) }
+        defer {
+            _ = resolvedInstances.withLock { resolved in
+                resolved.remove(key)
+            }
+        }
 
-        let instance = try await createInstance(
-            type: type,
-            arguments: arguments
-        )
+        let instance = try createInstance(type: type, arguments: arguments)
 
         if let injectableInstance = instance as? Injectable {
-            try await injectableInstance.resolveDependencies()
+
+            try injectableInstance.resolveDependencies()
         }
 
         return instance
 
     }
  
-    private func createInstance<T>(
+    private func createInstance<T: Sendable>(
         type: T.Type,
         arguments: Any...
-    ) async throws -> T {
+    ) throws -> T {
 
         let key = ObjectIdentifier(type)
 
-        guard let dependency = dependencies[key] else {
+        let dependency = dependencies.withLock { deps -> Dependency? in
+            return deps[key]
+        }
+
+        guard let dependency else {
             throw DependencyError.dependencyNotFound(type: type)
         }
 
         try detectCircularDependencies(for: type)
 
-        switch dependency.scope {
-
+        return switch dependency.scope {
         case .singleton:
+            try createSingletonInstance(
+                type: type,
+                key: key,
+                dependency: dependency,
+                arguments: arguments
+            )
 
-            if let sharedInstance = sharedInstances[key] as? T {
+        case .transient:
+            try createTransientInstance(
+                type: type,
+                dependency: dependency,
+                arguments: arguments
+            )
+        }
+    }
+
+    private func createSingletonInstance<T: Sendable>(
+        type: T.Type,
+        key: ObjectIdentifier,
+        dependency: Dependency,
+        arguments: [Any]
+    ) throws -> T {
+
+        let existingInstance = sharedInstances.withLock { instances -> T? in
+            return instances[key] as? T
+        }
+
+        if let existingInstance {
+            return existingInstance
+        }
+
+        guard let newInstance = dependency.factory(arguments) as? T else {
+            throw DependencyError.resolutionFailed(type: type)
+        }
+
+        return sharedInstances.withLock { instances -> T in
+
+            if let sharedInstance = instances[key] as? T {
                 return sharedInstance
             }
 
-            guard let sharedInstance = dependency.factory(arguments) as? T else {
-                throw DependencyError.resolutionFailed(type: type)
-            }
+            instances[key] = newInstance
+            return newInstance
+        }
+    }
 
-            sharedInstances[key] = sharedInstance
+    private func createTransientInstance<T: Sendable>(
+        type: T.Type,
+        dependency: Dependency,
+        arguments: [Any]
+    ) throws -> T {
 
-            return sharedInstance
-
-        case .transient:
-
-            guard let instance = dependency.factory(arguments) as? T else {
-                throw DependencyError.resolutionFailed(type: type)
-            }
-
-            return instance
+        guard let instance = dependency.factory(arguments) as? T else {
+            throw DependencyError.resolutionFailed(type: type)
         }
 
+        return instance
     }
 
     private func detectCircularDependencies(for type: Any.Type) throws {
@@ -147,14 +199,24 @@ public actor DependencyContainer {
 
             stack.insert(currentId)
 
-            if let dependenciesId = dependencyGraph[currentId] {
+            let dependenciesIds = dependencyGraph.withLock { graph in
+                graph[currentId]
+            }
+
+            if let dependenciesId = dependenciesIds {
                 for dependencyId in dependenciesId {
-                    if let dependencyTypes = dependencies[dependencyId]?.dependencyTypes {
+                    let dependencyTypes = dependencies.withLock{ deps in
+                        return deps[dependencyId]?.dependencyTypes
+                    }
+
+                    if let dependencyTypes = dependencyTypes {
                         for depType in dependencyTypes {
                             try depthFirstSearch(depType)
                         }
                     }
+
                 }
+
             }
             
             stack.remove(currentId)

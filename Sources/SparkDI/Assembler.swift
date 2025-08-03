@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class Assembler {
+public final class Assembler: @unchecked Sendable {
 
     let container: DependencyContainer
 
@@ -20,12 +20,12 @@ public final class Assembler {
 
     }
 
-    public func resolve<T>(
+    public func resolve<T:Sendable>(
         _ type: T.Type,
         arguments: Any...
     ) async -> T? {
 
-        try? await container.resolve(
+        try? container.resolve(
             type: type,
             arguments: arguments
         )

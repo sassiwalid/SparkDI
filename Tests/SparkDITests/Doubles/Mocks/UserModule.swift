@@ -7,7 +7,7 @@
 struct UserModule: Module {
 
     func registerDependencies(in container: SparkDI.DependencyContainer) async throws  {
-        try await container.register(
+        try container.register(
             type: UserServiceDummy.self,
             factory: { _ in
                 UserServiceDummy()

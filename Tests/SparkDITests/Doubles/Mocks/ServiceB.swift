@@ -4,7 +4,7 @@
 
 @testable import SparkDI
 
-class ServiceB {
+final class ServiceB: Sendable {
     let serviceA: ServiceA
 
     init(serviceA: ServiceA) {

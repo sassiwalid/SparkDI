@@ -4,8 +4,8 @@
 
 @testable import SparkDI
 
-class ServiceC: Injectable {
+final class ServiceC: Injectable, Sendable {
     init() { }
     
-    func resolveDependencies() async throws {}
+    func resolveDependencies() throws {}
 }

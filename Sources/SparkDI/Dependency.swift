@@ -1,14 +1,14 @@
 import Foundation
 
 @propertyWrapper
-struct Dependency<T> {
+struct Dependency<T:Sendable> {
 
     var instance: T?
 
     let assembler: Assembler
 
-    mutating func resolve() async throws  {
-        instance = try await assembler.container.resolve(type: T.self)
+    mutating func resolve() throws  {
+        instance = try assembler.container.resolve(type: T.self)
     }
 
     var wrappedValue: T {

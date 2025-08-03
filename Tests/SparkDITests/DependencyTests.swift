@@ -4,15 +4,15 @@ import Testing
 @testable import SparkDI
 
 struct SparkDIInjectedTests {
-    @Test func wrappedValueReturnResolvedInstance() async throws {
+    @Test func wrappedValueReturnResolvedInstance() throws {
         let container = DependencyContainer()
         let assembler = Assembler(container: container)
         
-        try await container.register(type: Int.self) { _ in 1 }
+        try container.register(type: Int.self) { _ in 1 }
 
         var newInt: Dependency<Int> = Dependency<Int>(assembler)
         
-        try await newInt.resolve()
+        try newInt.resolve()
         
         #expect(newInt.wrappedValue == 1)
     }
@@ -58,7 +58,7 @@ extension Dependency {
 
 enum FatalErrorUtil {
 
-    static var fatalErrorClosure: ((String, StaticString, UInt) -> Void)?
+    nonisolated(unsafe) static var fatalErrorClosure: ((String, StaticString, UInt) -> Void)?
 
     static func replaceFatalError(_ closure: @escaping (String, StaticString, UInt) -> Void) {
 
